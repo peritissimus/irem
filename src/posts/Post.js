@@ -1,4 +1,4 @@
-import signals from 'signals'
+import signals from '../events/signal.js'
 import { config } from '../config.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 

@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import signals from 'signals'
+import signals from '../../events/signal.js'
 import { config } from '../../config.js'
 import { inputController } from '../../controllers/inputController.js'
 import { EKTweener } from '../../ektweener.js'

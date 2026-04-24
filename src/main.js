@@ -1,14 +1,11 @@
 import $ from 'jquery'
-import signalsNamespace from 'signals'
+import signals from './events/signal.js'
 import { config, initConfig } from './config.js'
 import {
   installArchiveApiShim,
   installArchiveGlobals,
   installModernizrShim,
-  resolveSignals,
 } from './archive-runtime.js'
-
-const signals = resolveSignals(signalsNamespace)
 
 installModernizrShim()
 installArchiveGlobals($, signals)

@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import signals from 'signals'
+import signals from '../events/signal.js'
 import bind from 'mout/function/bind'
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'

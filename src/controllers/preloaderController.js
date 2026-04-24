@@ -1,4 +1,4 @@
-import signals from 'signals'
+import signals from '../events/signal.js'
 import { quickLoader } from '../loader/quickLoader.js'
 import { EKTweener } from '../ektweener.js'
 

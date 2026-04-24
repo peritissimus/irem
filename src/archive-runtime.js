@@ -2,14 +2,6 @@ export const UPLOADS_ROOT =
   'https://web.archive.org/web/20140624131123im_/http://i-remember.fr/uploads/'
 export const STATIC_POST_IMAGE = '/img/thumbnail.png'
 
-export function resolveSignals(signalsNamespace) {
-  return signalsNamespace?.Signal
-    ? signalsNamespace
-    : signalsNamespace?.default?.Signal
-      ? signalsNamespace.default
-      : signalsNamespace?.default ?? signalsNamespace
-}
-
 export function installArchiveGlobals($, signals) {
   window.$ = $
   window.jQuery = $

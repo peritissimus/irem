@@ -1,4 +1,4 @@
-import signals from 'signals'
+import signals from '../events/signal.js'
 import { EKTweener } from '../ektweener.js'
 
 let bgmAudio

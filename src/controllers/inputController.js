@@ -1,4 +1,4 @@
-import signals from 'signals'
+import signals from '../events/signal.js'
 import $ from 'jquery'
 
 const HANDLER_TYPES = ['over', 'out', 'tap', 'click', 'down', 'move', 'up', 'wheel']

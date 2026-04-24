@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import signals from 'signals'
+import signals from '../events/signal.js'
 import { config } from '../config.js'
 
 // NOTE: original imported `mout/queryString/encode` — inlined below.

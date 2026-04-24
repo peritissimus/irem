@@ -1,4 +1,4 @@
-import signals from 'signals'
+import signals from './events/signal.js'
 
 const onResize = new signals.Signal()
 const onRender = new signals.Signal()
