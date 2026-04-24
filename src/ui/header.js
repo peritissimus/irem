@@ -1,7 +1,7 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { animator } from '../animation/animator.js'
+import { qs, qsa, remove, setHeight, setText, show as showElement } from '../utils/dom.js'
 
 let container
 let bg
@@ -17,10 +17,10 @@ let isRetina
 const spriteRect = { x: 0, y: 356, width: 266, height: 44 }
 
 function preInit() {
-  container = $('.header')
-  bg = $('.header-bg')
-  _fadeContainer = $('.header-description, .header-fade-container')
-  preloaderController.add(container)
+  container = qs('.header')
+  bg = qs('.header-bg')
+  _fadeContainer = qsa('.header-description, .header-fade-container')
+  preloaderController.add([container, ...container.querySelectorAll('*')])
 }
 
 function init() {
@@ -33,7 +33,7 @@ function setupCanvas() {
   isRetina = config.isRetina
   targetFading = config.settings.fading
 
-  $('.header-logo').remove()
+  remove('.header-logo')
   canvas = document.createElement('canvas')
   canvas.className = 'header-logo'
 
@@ -46,9 +46,9 @@ function setupCanvas() {
   ctx = canvas.getContext('2d')
   uiAsset = config.uiAsset
 
-  container.find('.header-content').prepend(canvas)
-  percentNum = $('.header-fade-percent-num')
-  percentNum.html((100 - config.settings.fading) | 0)
+  qs('.header-content', container).prepend(canvas)
+  percentNum = qs('.header-fade-percent-num')
+  setText(percentNum, (100 - config.settings.fading) | 0)
 }
 
 // NOTE: empty function in original (w) — preserved as no-op
@@ -88,17 +88,17 @@ function animateFading(duration) {
 }
 
 function show() {
-  container.show()
-  animator.fromTo(container[0], { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
+  showElement(container)
+  animator.fromTo(container, { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
   animateFading()
 }
 
 function showBg() {
-  animator.to(bg[0], { duration: 1.3, scaleY: 1, ease: 'circ.out' })
+  animator.to(bg, { duration: 1.3, scaleY: 1, ease: 'circ.out' })
 }
 
 function hideBg() {
-  animator.to(bg[0], { duration: 1.3, scaleY: 0, ease: 'circ.out' })
+  animator.to(bg, { duration: 1.3, scaleY: 0, ease: 'circ.out' })
 }
 
 function updateFading(ratio) {
@@ -111,7 +111,7 @@ function updateFading(ratio) {
 }
 
 function changeHeight(height) {
-  container.height(height)
+  setHeight(container, height)
 }
 
 export const header = {
