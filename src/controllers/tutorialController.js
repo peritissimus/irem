@@ -1,8 +1,8 @@
-import $ from 'jquery'
 import { clamp } from '../utils/native.js'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs, show as showElement } from '../utils/dom.js'
 
 // NOTE: original imported `mout/math/norm` which throws outside [min, max]
 // (differs from the archived bundle). Replaced with the local
@@ -47,7 +47,7 @@ function easeOutCubic(t) {
 }
 
 function init() {
-  container = $('.tutorials')
+  container = qs('.tutorials')
   setupPages()
   postSetup()
 }
@@ -60,13 +60,13 @@ function setupPages() {
   let canvas
   for (let i = 0, len = PAGE_IDS.length; i < len; i++) {
     id = PAGE_IDS[i]
-    pageEl = $('.tutoral-page-' + id)
+    pageEl = qs('.tutoral-page-' + id)
     canvas = document.createElement('canvas')
     canvas.width = canvas.height = CANVAS_SIZE
-    pageEl.find('.tutorial-page-icon').append(canvas)
+    qs('.tutorial-page-icon', pageEl).append(canvas)
     canvasContexts[id] = canvas.getContext('2d')
-    pages.push((pageElements[id] = pageEl[0]))
-    pageEl[0].__id = id
+    pages.push((pageElements[id] = pageEl))
+    pageEl.__id = id
     frameCounts[id] = 0
   }
 
@@ -114,9 +114,9 @@ function firstUncompleted() {
 function show() {
   if (tutorialController.allCompleted) return
   lastTime = +new Date()
-  container.show()
-  animator.killTweensOf(container[0], 'opacity')
-  animator.to(container[0], { duration: 0.5, opacity: 1, ease: 'none' })
+  showElement(container)
+  animator.killTweensOf(container, 'opacity')
+  animator.to(container, { duration: 0.5, opacity: 1, ease: 'none' })
   switchToPage(firstUncompleted())
   stageReference.onRender.add(renderTick)
 }
@@ -367,13 +367,13 @@ function drawArrow(ctx, t) {
 
 function hide() {
   stageReference.onRender.remove(renderTick)
-  animator.killTweensOf(container[0], 'opacity')
-  animator.to(container[0], {
+  animator.killTweensOf(container, 'opacity')
+  animator.to(container, {
     duration: 0.5,
     opacity: 0,
     ease: 'none',
     onComplete() {
-      container.hide()
+      hideElement(container)
     },
   })
 }
