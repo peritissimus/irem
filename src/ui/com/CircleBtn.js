@@ -2,7 +2,7 @@ import $ from 'jquery'
 import signals from '../../events/signal.js'
 import { config } from '../../config.js'
 import { inputController } from '../../controllers/inputController.js'
-import { EKTweener } from '../../ektweener.js'
+import { animator } from '../../animation/animator.js'
 
 function clampedNorm(value, min, max) {
   const normalized = (value - min) / (max - min)
@@ -74,10 +74,12 @@ export class CircleBtn {
     this.isHover = true
 
     if (!this.isDimmed) {
-      EKTweener.to(this, 0.3, {
+      animator.killTweensOf(this, 'hoverAnimation')
+      animator.to(this, {
+        duration: 0.3,
         hoverAnimation: 1,
         onUpdate: this.boundRender,
-        ease: 'linear',
+        ease: 'none',
       })
     }
 
@@ -89,10 +91,12 @@ export class CircleBtn {
     this.isHover = false
 
     if (!this.isDimmed) {
-      EKTweener.to(this, 0.3, {
+      animator.killTweensOf(this, 'hoverAnimation')
+      animator.to(this, {
+        duration: 0.3,
         hoverAnimation: 0,
         onUpdate: this.boundRender,
-        ease: 'linear',
+        ease: 'none',
       })
     }
 

@@ -1,5 +1,5 @@
 import signals from '../events/signal.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let bgmAudio
 let addAudio
@@ -36,9 +36,11 @@ function playAdd() {
 function mute(duration) {
   soundController.isMute = true
   soundController.onMuteToggled.dispatch(true)
-  EKTweener.to(soundController, duration === undefined ? 1 : duration, {
+  animator.killTweensOf(soundController, 'globalVolume')
+  animator.to(soundController, {
+    duration: duration === undefined ? 1 : duration,
     globalVolume: 0,
-    ease: 'linear',
+    ease: 'none',
     onUpdate: applyVolume,
   })
 }
@@ -46,9 +48,11 @@ function mute(duration) {
 function unmute() {
   soundController.isMute = false
   soundController.onMuteToggled.dispatch(false)
-  EKTweener.to(soundController, 0, {
+  animator.killTweensOf(soundController, 'globalVolume')
+  animator.to(soundController, {
+    duration: 0,
     globalVolume: 1,
-    ease: 'linear',
+    ease: 'none',
     onUpdate: applyVolume,
   })
   playBgm()

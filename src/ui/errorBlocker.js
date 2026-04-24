@@ -3,7 +3,7 @@ import { config } from '../config.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { inputController } from '../controllers/inputController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original imported `mout/lang/isArray` — replaced with the native
 // `Array.isArray`. Also, two unused locals (`f`, `l`) from the minified
@@ -68,7 +68,12 @@ function show(messages, callback) {
     messagesContainer.append(node)
   }
 
-  EKTweener.to(scene3dController.customShader.uniforms.alpha, 1, { value: 0.2 })
+  animator.killTweensOf(scene3dController.customShader.uniforms.alpha, 'value')
+  animator.to(scene3dController.customShader.uniforms.alpha, {
+    duration: 1,
+    value: 0.2,
+    ease: 'circ.out',
+  })
   container.show()
 }
 
@@ -77,8 +82,11 @@ function hide() {
   pendingCallback = null
   isVisible = false
   container.hide()
-  EKTweener.to(scene3dController.customShader.uniforms.alpha, 1, {
+  animator.killTweensOf(scene3dController.customShader.uniforms.alpha, 'value')
+  animator.to(scene3dController.customShader.uniforms.alpha, {
+    duration: 1,
     value: config.DEFAULT_NOISE_RATIO,
+    ease: 'circ.out',
   })
   messagesContainer.find('> *').remove()
   if (queue.length > 0) {
