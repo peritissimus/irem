@@ -78,7 +78,6 @@ let windowWidth
 let windowHeight
 let halfWidth
 let camera
-let projector
 let raycaster
 let mainScene
 let particlesScene
@@ -171,7 +170,6 @@ function init() {
   containerStyle = container[0].style
 
   camera = new THREE.PerspectiveCamera(100, 1, 1, 3000)
-  projector = new THREE.Projector()
   raycaster = new THREE.Raycaster()
   mainScene = new THREE.Scene()
 
@@ -527,9 +525,7 @@ function render() {
     const candidates = searchMeshes.concat(navMeshes)
     if (hoveredInteractivePost) candidates.unshift(hoveredInteractivePost)
 
-    const ndcPoint = new THREE.Vector3(normalizedMouseX, normalizedMouseY, 1)
-    projector.unprojectVector(ndcPoint, camera)
-    raycaster.set(camera.position, ndcPoint.sub(camera.position).normalize())
+    raycaster.setFromCamera({ x: normalizedMouseX, y: normalizedMouseY }, camera)
 
     let hit
     for (let i = 0, len = candidates.length; i < len; i += 1) {
