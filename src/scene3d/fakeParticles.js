@@ -33,10 +33,14 @@ function init(scene) {
     depthTest: false,
     fog: true,
   })
-  const geometry = new THREE.Geometry()
+  const geometry = new THREE.BufferGeometry()
+  const positions = new Float32Array(AMOUNT * 3)
   for (let i = 0; i < AMOUNT; i++) {
-    geometry.vertices.push(new THREE.Vector3(i, 0, 0))
+    positions[i * 3] = i
+    positions[i * 3 + 1] = 0
+    positions[i * 3 + 2] = 0
   }
+  geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
   fakeParticles.particles = new THREE.PointCloud(geometry, material)
   scene.add(fakeParticles.particles)
 }
