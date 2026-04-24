@@ -7,7 +7,7 @@ import { soundController } from '../controllers/soundController.js'
 import { trackEvent, trackPage } from '../controllers/trackingController.js'
 import { socialShare } from '../utils/socialUtils.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 const trackHandlers = { trackPage, trackEvent }
 
@@ -92,16 +92,16 @@ function onShareClick() {
 }
 
 function show() {
-  EKTweener.fromTo(container, 0.5, { opacity: 0 }, { opacity: 1, ease: 'linear' })
   container.show()
+  animator.fromTo(container[0], { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
 }
 
 function showBg() {
-  EKTweener.to(bg, 1.3, { transform3d: 'scale3d(1,1,1)' })
+  animator.to(bg[0], { duration: 1.3, scaleY: 1, ease: 'circ.out' })
 }
 
 function hideBg() {
-  EKTweener.to(bg, 1.3, { transform3d: 'scale3d(1,0,1)' })
+  animator.to(bg[0], { duration: 1.3, scaleY: 0, ease: 'circ.out' })
 }
 
 function updateFading(ratio) {
