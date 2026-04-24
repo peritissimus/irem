@@ -7,7 +7,7 @@ import { inputController } from '../controllers/inputController.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { postController } from '../controllers/postController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 const BASE_FONT_SIZE = 100
 
@@ -125,21 +125,33 @@ function show() {
   postController.parsedTagName = ''
   lastSearchedTag = null
   container.show()
-  EKTweener.fromTo(
-    container,
-    0.5,
+  animator.killTweensOf(container[0], 'opacity')
+  animator.fromTo(
+    container[0],
     { opacity: 0 },
-    { opacity: 1, ease: 'linear' },
+    { duration: 0.5, opacity: 1, ease: 'none' },
   )
-  EKTweener.to(centerWrapper, 0, { transform3d: 'translateZ(0)' })
-  EKTweener.fromTo(
-    lineEl,
-    0.5,
-    { transform3d: 'scale3d(0, 1, 1)' },
-    { transform3d: 'scale3d(1, 1, 1)' },
+  // NOTE: original `transform3d: 'translateZ(0)'` wrote a full `translateZ(0)`
+  // transform, implicitly resetting any residual scale left by hide(). Migrated
+  // to an explicit scale reset alongside the z-translation.
+  animator.killTweensOf(centerWrapper[0], 'scale,scaleX,scaleY,z')
+  animator.set(centerWrapper[0], { scale: 1, z: 0 })
+  // NOTE: original `scale3d(0, 1, 1)` -> `scale3d(1, 1, 1)` only varies X; Y and
+  // Z stay at identity, so only scaleX is animated.
+  animator.killTweensOf(lineEl[0], 'scaleX')
+  animator.fromTo(
+    lineEl[0],
+    { scaleX: 0 },
+    { duration: 0.5, scaleX: 1, ease: 'circ.out' },
   )
-  EKTweener.to(inputWrapper, 0, { opacity: 0 })
-  EKTweener.to(inputWrapper, 0.5, { delay: 0.5, opacity: 1 })
+  animator.killTweensOf(inputWrapper[0], 'opacity')
+  animator.set(inputWrapper[0], { opacity: 0 })
+  animator.to(inputWrapper[0], {
+    duration: 0.5,
+    delay: 0.5,
+    opacity: 1,
+    ease: 'circ.out',
+  })
   inputEl.focus()
 }
 
@@ -147,9 +159,15 @@ function hide(duration) {
   // Original: `e = e === c ? .5 : e` where `c` is undefined — so this
   // collapses to "default to 0.5 if no arg passed". Preserved literally.
   duration = duration === UNDECLARED_C ? 0.5 : duration
-  EKTweener.to(container, duration, { opacity: 0, ease: 'linear' })
-  EKTweener.to(centerWrapper, duration, {
-    transform3d: 'scale3d(.85, .85, 1)',
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], { duration, opacity: 0, ease: 'none' })
+  // NOTE: original `scale3d(.85, .85, 1)` leaves Z at identity; migrated to
+  // gsap `scale` (shorthand for scaleX + scaleY).
+  animator.killTweensOf(centerWrapper[0], 'scale,scaleX,scaleY')
+  animator.to(centerWrapper[0], {
+    duration,
+    scale: 0.85,
+    ease: 'circ.out',
     onComplete() {
       container.hide()
     },
