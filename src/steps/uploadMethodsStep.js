@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { bind, get } from '../utils/native.js'
 import { config } from '../config.js'
 import { stepCircle } from '../scene3d/stepCircle.js'
@@ -8,6 +7,15 @@ import { inputController } from '../controllers/inputController.js'
 import { facebook } from '../socials/facebook.js'
 import { instagram } from '../socials/instagram.js'
 import { animator } from '../animation/animator.js'
+import {
+  hide as hideElement,
+  qs,
+  qsa,
+  setText,
+  show as showElement,
+  toggleClass,
+} from '../utils/dom.js'
+import { requestJson } from '../utils/request.js'
 
 // NOTE: original AMD factory captured `t.transform3DStyle` and
 // `t.ERROR_MESSAGES` at module-load time — both are read inside functions
@@ -50,34 +58,35 @@ function init() {
 }
 
 function cacheElements() {
-  container = $('.add-steps-upload-methods')
-  selectionContainer = $('.add-steps-upload-methods-selection-container')
-  circleBtns = $('.add-steps-upload-methods-icons-container .circle-btn')
-  facebookSymbol = $('.circle-btn-symbol-facebook')
-  instagramSymbol = $('.circle-btn-symbol-instagram')
-  localSymbol = $('.circle-btn-symbol-local')
-  textsContainer = $('.add-steps-upload-methods-texts-container')
-  localForm = $('.add-steps-upload-methods-local-form')
-  localInput = $('#local-upload')
-  albumContainer = $('.add-steps-upload-methods-album-container')
-  scrollPane = $('.add-steps-upload-methods-items-scroll-wrapper')[0].scrollpane
+  container = qs('.add-steps-upload-methods')
+  selectionContainer = qs('.add-steps-upload-methods-selection-container')
+  circleBtns = qsa('.add-steps-upload-methods-icons-container .circle-btn')
+  facebookSymbol = qs('.circle-btn-symbol-facebook')
+  instagramSymbol = qs('.circle-btn-symbol-instagram')
+  localSymbol = qs('.circle-btn-symbol-local')
+  textsContainer = qs('.add-steps-upload-methods-texts-container')
+  localForm = qs('.add-steps-upload-methods-local-form')
+  localInput = qs('#local-upload')
+  albumContainer = qs('.add-steps-upload-methods-album-container')
+  scrollPane = qs('.add-steps-upload-methods-items-scroll-wrapper').scrollpane
   scrollPane.onUpdateCallback = onScrollUpdate
-  itemsContainer = $('.add-steps-upload-methods-items-container-inner')
-  itemTemplate = $('.add-steps-upload-methods-item').remove()
-  albumCloseBtn = $('.add-steps-upload-methods-album-close-btn')
-  _albumOpenBtn = $('.add-steps-upload-methods-album-footer-btn-album-open')
-  photoBackBtn = $('.add-steps-upload-methods-album-footer-btn-photo-back')
-  photoOpenBtn = $('.add-steps-upload-methods-album-footer-btn-photo-open')
-  loadingEl = $('.add-steps-upload-methods-loading')
+  itemsContainer = qs('.add-steps-upload-methods-items-container-inner')
+  itemTemplate = qs('.add-steps-upload-methods-item')
+  itemTemplate.remove()
+  albumCloseBtn = qs('.add-steps-upload-methods-album-close-btn')
+  _albumOpenBtn = qs('.add-steps-upload-methods-album-footer-btn-album-open')
+  photoBackBtn = qs('.add-steps-upload-methods-album-footer-btn-photo-back')
+  photoOpenBtn = qs('.add-steps-upload-methods-album-footer-btn-photo-open')
+  loadingEl = qs('.add-steps-upload-methods-loading')
 }
 
 function bindEvents() {
-  circleBtns.each(function () {
-    this.circleBtn.onOvered.add(onIconOver)
-    this.circleBtn.onOuted.add(onIconOut)
-    this.circleBtn.onClicked.add(onIconClick)
+  circleBtns.forEach((button) => {
+    button.circleBtn.onOvered.add(onIconOver)
+    button.circleBtn.onOuted.add(onIconOut)
+    button.circleBtn.onClicked.add(onIconClick)
   })
-  localInput.change(onLocalInputChange)
+  localInput.addEventListener('change', onLocalInputChange)
   instagram.onRetrievedSuccess.add(onInstagramSuccess)
   instagram.onRetrievedFailed.add(onInstagramFailed)
   facebook.onRetrievedSuccess.add(onFacebookSuccess)
@@ -88,18 +97,16 @@ function bindEvents() {
 }
 
 function onPhotoOpen() {
-  const selected = $('.add-steps-upload-methods-item.is-selected')
-  if (selected.length > 0) doUpload(selected.data('img'))
+  const selected = qs('.add-steps-upload-methods-item.is-selected')
+  if (selected) doUpload(selected.dataset.img)
 }
 
 function onPhotoBack() {
   currentView = savedAlbumView
-  itemsContainer.find('> *').remove()
-  albumContainer.removeClass('has-selected')
-  itemsContainer.append(savedAlbumItems)
-  albumContainer.removeClass('is-facebook is-instagram is-photos is-albums')
-  albumContainer.addClass('is-' + currentView.type)
-  albumContainer.addClass('is-' + currentView.social)
+  itemsContainer.replaceChildren()
+  toggleClass(albumContainer, 'has-selected', false)
+  itemsContainer.append(...savedAlbumItems)
+  setAlbumClasses(currentView)
   scrollPane.onResize()
 }
 
@@ -134,7 +141,7 @@ function onIconClick(circleBtn) {
   } else if (type === 'instagram') {
     instagram.retrieveImages()
   } else {
-    localInput.val(null)
+    localInput.value = ''
   }
 }
 
@@ -216,42 +223,39 @@ function onInstagramSuccess(response) {
 }
 
 function setItemImage(node, url) {
-  node
-    .find('.add-steps-upload-methods-item-image')
-    .css('backgroundImage', 'url(' + url + ')')
+  qs('.add-steps-upload-methods-item-image', node).style.backgroundImage =
+    `url(${url})`
 }
 
 function renderView(view) {
   const isSwitch =
     currentView.type !== view.type || currentView.social !== view.social
-  animator.killTweensOf(albumContainer[0], 'opacity')
-  animator.to(albumContainer[0], { duration: 0.5, opacity: 1, ease: 'none' })
+  animator.killTweensOf(albumContainer, 'opacity')
+  animator.to(albumContainer, { duration: 0.5, opacity: 1, ease: 'none' })
 
   if (isSwitch) {
     if (view.social === 'facebook' && view.type === 'photos') {
       savedAlbumView = currentView
-      savedAlbumItems = itemsContainer.find('> *')
-      savedAlbumItems.detach()
+      savedAlbumItems = Array.from(itemsContainer.children)
+      itemsContainer.replaceChildren()
     } else {
-      itemsContainer.find('> *').remove()
+      itemsContainer.replaceChildren()
     }
-    albumContainer.removeClass('has-selected')
+    toggleClass(albumContainer, 'has-selected', false)
   }
 
-  albumContainer.removeClass('is-facebook is-instagram is-photos is-albums')
-  albumContainer.addClass('is-' + view.type)
-  albumContainer.addClass('is-' + view.social)
+  setAlbumClasses(view)
 
   let node
   let item
   const items = view.items
   for (let i = 0, len = items.length; i < len; i++) {
     item = items[i]
-    node = itemTemplate.clone()
-    node.data('img', item.img)
-    node.find('.add-steps-upload-methods-item-name').text(item.text)
+    node = itemTemplate.cloneNode(true)
+    node.dataset.img = item.img
+    setText(qs('.add-steps-upload-methods-item-name', node), item.text)
     if (view.social === 'facebook' && view.type === 'albums') {
-      node.data('id', item.id)
+      node.dataset.id = item.id
       facebook.getImageUrl(item.thumb, setItemImage, node)
     } else {
       setItemImage(node, item.thumb)
@@ -266,22 +270,23 @@ function renderView(view) {
   // Looks like a latent bug, preserved verbatim.
   if (!isSwitch) view.items.unshift(currentView.items)
   currentView = view
-  albumContainer.show()
+  showElement(albumContainer)
   scrollPane.onResize()
   scrollPane.moveToPos(restoredPos, 1)
 }
 
 function onItemClick() {
-  const $item = $(this)
   if (
-    albumContainer.hasClass('is-albums') &&
-    albumContainer.hasClass('is-facebook')
+    albumContainer.classList.contains('is-albums') &&
+    albumContainer.classList.contains('is-facebook')
   ) {
-    facebook.retrieveImages({ type: 'photos', albumId: $item.data('id') })
+    facebook.retrieveImages({ type: 'photos', albumId: this.dataset.id })
   } else {
-    $('.add-steps-upload-methods-item').removeClass('is-selected')
-    $item.addClass('is-selected')
-    albumContainer.addClass('has-selected')
+    qsa('.add-steps-upload-methods-item').forEach((item) => {
+      toggleClass(item, 'is-selected', false)
+    })
+    toggleClass(this, 'is-selected', true)
+    toggleClass(albumContainer, 'has-selected', true)
   }
 }
 
@@ -291,8 +296,8 @@ function onAlbumClose() {
 
 function resetAlbumState() {
   currentView = {}
-  albumContainer.removeClass('has-selected')
-  albumContainer.hide()
+  toggleClass(albumContainer, 'has-selected', false)
+  hideElement(albumContainer)
 }
 
 // NOTE: empty function in original (Z) — instagram failure handler
@@ -332,70 +337,63 @@ function onLocalInputChange() {
 
 function doUpload(fileOrUrl) {
   let formData
-  const ajaxOptions = {
-    url: 'api/upload-image',
-    type: 'POST',
-    dataType: 'json',
-    success: onUploadSuccess,
-    error: onUploadError,
-    cache: false,
-    contentType: false,
-    processData: false,
-  }
   if (typeof fileOrUrl === 'string') {
     formData = new FormData()
     formData.append('url', fileOrUrl)
   } else {
-    formData = new FormData(localForm[0])
-    ajaxOptions.mimeType = 'multipart/form-data'
+    formData = new FormData(localForm)
   }
   formData.append('ln', config.LANG)
-  ajaxOptions.data = formData
   showUploading()
-  $.ajax(ajaxOptions)
+  requestJson('api/upload-image', {
+    method: 'POST',
+    data: formData,
+    success: onUploadSuccess,
+    error: onUploadError,
+  })
 }
 
 function showUploading() {
   uiController.lock('upload-image')
-  loadingEl.show()
-  animator.killTweensOf(loadingEl[0], 'opacity')
-  animator.set(loadingEl[0], { opacity: 0 })
-  animator.to(loadingEl[0], {
+  showElement(loadingEl)
+  animator.killTweensOf(loadingEl, 'opacity')
+  animator.set(loadingEl, { opacity: 0 })
+  animator.to(loadingEl, {
     duration: 0.5,
     delay: 0.3,
     opacity: 1,
     ease: 'none',
   })
-  animator.killTweensOf(selectionContainer[0], 'opacity')
-  animator.to(selectionContainer[0], {
+  animator.killTweensOf(selectionContainer, 'opacity')
+  animator.to(selectionContainer, {
     duration: 0.3,
     opacity: 0,
     ease: 'none',
   })
-  animator.killTweensOf(albumContainer[0], 'opacity')
-  animator.to(albumContainer[0], {
+  animator.killTweensOf(albumContainer, 'opacity')
+  animator.to(albumContainer, {
     duration: 0.3,
     opacity: 0,
     ease: 'none',
     onComplete() {
-      albumContainer.hide()
+      hideElement(albumContainer)
     },
   })
 }
 
 function hideUploading() {
   uiController.unlock('upload-image')
-  loadingEl.hide()
-  animator.killTweensOf(loadingEl[0], 'opacity')
-  animator.to(loadingEl[0], { duration: 0.5, opacity: 0, ease: 'none' })
-  animator.killTweensOf(selectionContainer[0], 'opacity')
-  animator.to(selectionContainer[0], {
+  hideElement(loadingEl)
+  animator.killTweensOf(loadingEl, 'opacity')
+  animator.to(loadingEl, { duration: 0.5, opacity: 0, ease: 'none' })
+  animator.killTweensOf(selectionContainer, 'opacity')
+  animator.to(selectionContainer, {
     duration: 0.3,
     opacity: 1,
     ease: 'none',
   })
-  animator.killTweensOf(albumContainer[0], 'opacity')
-  animator.to(albumContainer[0], { duration: 0.3, opacity: 1, ease: 'none' })
+  animator.killTweensOf(albumContainer, 'opacity')
+  animator.to(albumContainer, { duration: 0.3, opacity: 1, ease: 'none' })
 }
 
 function onUploadSuccess(response) {
@@ -424,41 +422,41 @@ function show() {
   stepController.disableValidateBtn()
   stepController.hideBackBtn()
   stepController.hideValidateBtn()
-  container.show()
+  showElement(container)
   setSelectionType('default')
   iconLocked = false
-  animator.killTweensOf(loadingEl[0], 'opacity')
-  animator.set(loadingEl[0], { opacity: 0 })
-  animator.killTweensOf(selectionContainer[0], 'opacity')
-  animator.set(selectionContainer[0], { opacity: 1 })
-  animator.killTweensOf(albumContainer[0], 'opacity')
-  animator.set(albumContainer[0], { opacity: 0 })
-  albumContainer.hide()
-  itemsContainer.find('> *').remove()
+  animator.killTweensOf(loadingEl, 'opacity')
+  animator.set(loadingEl, { opacity: 0 })
+  animator.killTweensOf(selectionContainer, 'opacity')
+  animator.set(selectionContainer, { opacity: 1 })
+  animator.killTweensOf(albumContainer, 'opacity')
+  animator.set(albumContainer, { opacity: 0 })
+  hideElement(albumContainer)
+  itemsContainer.replaceChildren()
   // NOTE: original used `transform3d: 'translate3d(Xpx,0,0)'` — migrated to
   // gsap's `x` shorthand. Original fromTo omitted `ease` on toVars, which
   // falls back to EKTweener's default (`easeOutCirc`) — preserved as `circ.out`.
-  animator.killTweensOf(facebookSymbol[0], 'x,opacity')
+  animator.killTweensOf(facebookSymbol, 'x,opacity')
   animator.fromTo(
-    facebookSymbol[0],
+    facebookSymbol,
     { x: 60, opacity: 0 },
     { duration: 0.5, x: 0, opacity: 1, ease: 'circ.out' },
   )
-  animator.killTweensOf(instagramSymbol[0], 'opacity')
+  animator.killTweensOf(instagramSymbol, 'opacity')
   animator.fromTo(
-    instagramSymbol[0],
+    instagramSymbol,
     { opacity: 0 },
     { duration: 0.5, opacity: 1, ease: 'none' },
   )
-  animator.killTweensOf(localSymbol[0], 'x,opacity')
+  animator.killTweensOf(localSymbol, 'x,opacity')
   animator.fromTo(
-    localSymbol[0],
+    localSymbol,
     { x: -60, opacity: 0 },
     { duration: 0.5, x: 0, opacity: 1, ease: 'circ.out' },
   )
-  animator.killTweensOf(textsContainer[0], 'opacity')
+  animator.killTweensOf(textsContainer, 'opacity')
   animator.fromTo(
-    textsContainer[0],
+    textsContainer,
     { opacity: 0 },
     { duration: 0.2, opacity: 1, ease: 'none' },
   )
@@ -471,13 +469,18 @@ function show() {
 }
 
 function setSelectionType(type) {
-  container.removeClass('is-default is-facebook is-instagram is-local')
-  if (type) container.addClass('is-' + type)
+  container.classList.remove(
+    'is-default',
+    'is-facebook',
+    'is-instagram',
+    'is-local',
+  )
+  if (type) container.classList.add('is-' + type)
 }
 
 function hide() {
   setSelectionType()
-  container.hide()
+  hideElement(container)
   resetAlbumState()
   animator.killTweensOf(stepCircle.uniforms.focusRatio, 'value')
   animator.to(stepCircle.uniforms.focusRatio, {
@@ -490,6 +493,16 @@ function hide() {
 function onBGClick() {
   if (currentView.type) onAlbumClose()
   else stepController.hide()
+}
+
+function setAlbumClasses(view) {
+  albumContainer.classList.remove(
+    'is-facebook',
+    'is-instagram',
+    'is-photos',
+    'is-albums',
+  )
+  albumContainer.classList.add('is-' + view.type, 'is-' + view.social)
 }
 
 export const uploadMethodsStep = {
