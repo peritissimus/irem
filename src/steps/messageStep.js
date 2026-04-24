@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { trim, isArray, interpolate } from '../utils/native.js'
 import { config } from '../config.js'
 import { stepController } from '../controllers/stepController.js'
@@ -6,6 +5,14 @@ import { inputController } from '../controllers/inputController.js'
 import { postController } from '../controllers/postController.js'
 import { uiController } from '../controllers/uiController.js'
 import { animator } from '../animation/animator.js'
+import {
+  hide as hideElement,
+  qs,
+  qsa,
+  show as showElement,
+  toggleClass,
+} from '../utils/dom.js'
+import { requestJson } from '../utils/request.js'
 
 let container
 let itemsWrapper
@@ -28,80 +35,85 @@ let messageDefaultHTML
 let emptyMarker
 
 function init() {
-  container = $('.add-steps-message')
+  container = qs('.add-steps-message')
   // matches original: M = $('<p>&#8203;</p>').text() — the zero-width space char
-  emptyMarker = $('<p>&#8203;</p>').text()
+  emptyMarker = '\u200b'
   initElements()
   initEvents()
 }
 
 function initElements() {
-  itemsWrapper = $('.add-steps-message-items-wrapper')
-  nameWrapper = $('.add-steps-message-name-wrapper')
-  nameInput = nameWrapper.find('.add-steps-message-input')
-  emailWrapper = $('.add-steps-message-email-wrapper')
-  emailInput = emailWrapper.find('.add-steps-message-input')
-  messageWrapper = $('.add-steps-message-message-wrapper')
-  messagePrefix = messageWrapper.find('.add-steps-message-message-prefix')
-  messageInput = messageWrapper.find('.add-steps-message-input')
-  messageScrollpane = messageWrapper[0].scrollpane
-  nameDefaultHTML = nameInput.html()
-  emailDefaultHTML = emailInput.html()
-  messageDefaultHTML = messageInput.html()
-  termsWrapper = $('.add-steps-message-terms')
-  termsAcceptEl = $('.add-steps-message-terms-i-accept')
-  termsLinkEl = $('.add-steps-message-terms-link')
+  itemsWrapper = qs('.add-steps-message-items-wrapper')
+  nameWrapper = qs('.add-steps-message-name-wrapper')
+  nameInput = qs('.add-steps-message-input', nameWrapper)
+  emailWrapper = qs('.add-steps-message-email-wrapper')
+  emailInput = qs('.add-steps-message-input', emailWrapper)
+  messageWrapper = qs('.add-steps-message-message-wrapper')
+  messagePrefix = qs('.add-steps-message-message-prefix', messageWrapper)
+  messageInput = qs('.add-steps-message-input', messageWrapper)
+  messageScrollpane = messageWrapper.scrollpane
+  nameDefaultHTML = nameInput.innerHTML
+  emailDefaultHTML = emailInput.innerHTML
+  messageDefaultHTML = messageInput.innerHTML
+  termsWrapper = qs('.add-steps-message-terms')
+  termsAcceptEl = qs('.add-steps-message-terms-i-accept')
+  termsLinkEl = qs('.add-steps-message-terms-link')
   // NOTE: original selector lists `.add-steps-message-input` three times rather
   //       than naming the three fields individually — preserved verbatim.
-  allInputsAndTerms = $(
+  allInputsAndTerms = qsa(
     '.add-steps-message-input, .add-steps-message-input, .add-steps-message-input, .add-steps-message-terms-i-accept',
   )
 
-  nameInput[0].__focusY = 110
-  nameInput[0].__id = 'name'
-  nameInput[0].__container = nameWrapper
-  nameInput[0].__defaultHTML = nameDefaultHTML
-  nameInput[0].__defaultText = trim(nameInput.text())
+  nameInput.__focusY = 110
+  nameInput.__id = 'name'
+  nameInput.__container = nameWrapper
+  nameInput.__defaultHTML = nameDefaultHTML
+  nameInput.__defaultText = trim(nameInput.textContent)
 
-  emailInput[0].__focusY = 63
-  emailInput[0].__id = 'email'
-  emailInput[0].__container = emailWrapper
-  emailInput[0].__defaultHTML = emailDefaultHTML
-  emailInput[0].__defaultText = trim(emailInput.text())
+  emailInput.__focusY = 63
+  emailInput.__id = 'email'
+  emailInput.__container = emailWrapper
+  emailInput.__defaultHTML = emailDefaultHTML
+  emailInput.__defaultText = trim(emailInput.textContent)
 
-  messageInput[0].__focusY = 23
-  messageInput[0].__id = 'message'
-  messageInput[0].__container = messageWrapper
-  messageInput[0].__defaultHTML = messageDefaultHTML
-  messageInput[0].__defaultText = trim(messageInput.text())
+  messageInput.__focusY = 23
+  messageInput.__id = 'message'
+  messageInput.__container = messageWrapper
+  messageInput.__defaultHTML = messageDefaultHTML
+  messageInput.__defaultText = trim(messageInput.textContent)
 
-  termsAcceptEl[0].__focusY = 23
-  termsAcceptEl[0].__id = 'terms'
-  termsAcceptEl[0].__container = termsWrapper
+  termsAcceptEl.__focusY = 23
+  termsAcceptEl.__id = 'terms'
+  termsAcceptEl.__container = termsWrapper
 
-  allInputsAndTerms.each(function registerField() {
-    fieldsById[this.__id] = this
+  allInputsAndTerms.forEach((field) => {
+    fieldsById[field.__id] = field
   })
 }
 
 function initEvents() {
-  allInputsAndTerms.focus(function onFieldFocus() {
-    focusField(this.__id, 0.5)
+  allInputsAndTerms.forEach((field) => {
+    field.addEventListener('focus', function onFieldFocus() {
+      focusField(this.__id, 0.5)
+    })
   })
-  nameInput
-    .add(emailInput)
-    .add(messageInput)
-    .on('input', onInputChange)
-  nameInput.add(emailInput).on('keypress', function onKeypress(event) {
-    if (event.which === 13) return false
-    this.__skipLineBreakParsing = true
-    return true
+  ;[nameInput, emailInput, messageInput].forEach((input) => {
+    input.addEventListener('input', onInputChange)
+  })
+  ;[nameInput, emailInput].forEach((input) => {
+    input.addEventListener('keypress', function onKeypress(event) {
+      if (event.which === 13) {
+        event.preventDefault()
+        return
+      }
+      this.__skipLineBreakParsing = true
+    })
   })
   inputController.add(termsLinkEl, 'click', onTermsLinkClick)
   inputController.add(termsAcceptEl, 'click', onTermsAcceptClick)
-  nameInput.blur(validateName)
-  emailInput.blur(validateEmail)
-  messageInput.blur(validateMessage)
+  nameInput.addEventListener('blur', validateName)
+  emailInput.addEventListener('blur', validateEmail)
+  messageInput.addEventListener('blur', validateMessage)
 }
 
 function onTermsLinkClick() {
@@ -111,25 +123,25 @@ function onTermsLinkClick() {
 
 function onTermsAcceptClick() {
   focusField('terms', 0.5)
-  termsAcceptEl.toggleClass('selected')
+  termsAcceptEl.classList.toggle('selected')
   if (isTermsAccepted()) stepController.enableValidateBtn()
   else stepController.disableValidateBtn()
 }
 
 function onInputChange() {
-  const html = $(this).html()
-  let text = $(this).text()
+  const html = this.innerHTML
+  let text = this.textContent
   if (html.indexOf('<br>') > -1 || html.lastIndexOf('<div>') !== -1) {
     this.innerHTML = text
     moveCaretToEnd(this)
   }
-  text = trim($(this).text())
+  text = trim(this.textContent)
   if (text.length === 0 && this.__id !== 'message') {
-    $(this).html(this.__defaultHTML)
+    this.innerHTML = this.__defaultHTML
     selectAll(this)
   }
   this.__skipLineBreakParsing = false
-  if (this === messageInput[0]) messageScrollpane.onResize()
+  if (this === messageInput) messageScrollpane.onResize()
 }
 
 function selectAll(node) {
@@ -163,8 +175,8 @@ function focusField(id, duration) {
   const field = fieldsById[id]
   // NOTE: original used `transform3d: 'translate3d(0, Ypx, 0)'` — migrated to
   // gsap's `y` which animates translateY through its transform system.
-  animator.killTweensOf(itemsWrapper[0], 'y')
-  animator.to(itemsWrapper[0], {
+  animator.killTweensOf(itemsWrapper, 'y')
+  animator.to(itemsWrapper, {
     duration,
     y: field.__focusY,
     ease: 'none',
@@ -172,32 +184,33 @@ function focusField(id, duration) {
 
   if (id === 'name') {
     if (!validateName()) {
-      nameInput.text(emptyMarker)
-      moveCaretToEnd(nameInput[0])
+      nameInput.textContent = emptyMarker
+      moveCaretToEnd(nameInput)
     }
   } else if (id === 'email') {
-    if (emailInput.text() === emailInput[0].__defaultText) {
-      emailInput.text(emptyMarker)
-      moveCaretToEnd(emailInput[0])
+    if (emailInput.textContent === emailInput.__defaultText) {
+      emailInput.textContent = emptyMarker
+      moveCaretToEnd(emailInput)
     }
   } else if (id === 'message') {
     // NOTE: original does not call moveCaretToEnd in the message branch — preserved
-    if (!validateMessage()) messageInput.text(emptyMarker)
+    if (!validateMessage()) messageInput.textContent = emptyMarker
   }
 
   let focusedIndex = -1
-  allInputsAndTerms.removeClass('focus')
-  allInputsAndTerms.each(function findIndex(i) {
-    if (this === field) {
+  allInputsAndTerms.forEach((item) => toggleClass(item, 'focus', false))
+  allInputsAndTerms.some((item, i) => {
+    if (item === field) {
       focusedIndex = i
-      return false
+      return true
     }
+    return false
   })
-  allInputsAndTerms.each(function fadeField(i) {
-    const container = this.__container
+  allInputsAndTerms.forEach((item, i) => {
+    const container = item.__container
     if (i > focusedIndex + 1) {
-      animator.killTweensOf(container[0], 'opacity')
-      animator.to(container[0], {
+      animator.killTweensOf(container, 'opacity')
+      animator.to(container, {
         duration,
         opacity: 0,
         ease: 'none',
@@ -205,19 +218,19 @@ function focusField(id, duration) {
           // NOTE: original set `this._appliedTarget.visibility = 'hidden'`
           // where `_appliedTarget` was the element's style object; equivalent
           // to setting CSS `visibility: hidden` on the container.
-          container.css('visibility', 'hidden')
+          container.style.visibility = 'hidden'
         },
       })
     } else {
-      this.__container.css('visibility', 'visible')
-      animator.killTweensOf(container[0], 'opacity')
-      animator.to(container[0], {
+      item.__container.style.visibility = 'visible'
+      animator.killTweensOf(container, 'opacity')
+      animator.to(container, {
         duration,
         opacity: i === focusedIndex ? 1 : 0.75,
         ease: 'none',
       })
     }
-    this.__container.toggleClass('focus', i === focusedIndex)
+    toggleClass(item.__container, 'focus', i === focusedIndex)
   })
 }
 
@@ -226,22 +239,22 @@ function show() {
   stepController.disableValidateBtn()
   stepController.showBackBtn(onBackBtn)
   stepController.showValidateBtn(onValidateBtn)
-  container.show()
-  messageInput.css({ textIndent: messagePrefix.width() + 5 })
+  showElement(container)
+  messageInput.style.textIndent = `${messagePrefix.offsetWidth + 5}px`
   reset()
 }
 
 function validateName() {
-  let text = trim(nameInput.text())
+  let text = trim(nameInput.textContent)
   text = text.replace(emptyMarker, '')
-  const valid = text.length > 1 && text !== nameInput[0].__defaultText
-  nameWrapper.toggleClass('completed', valid)
-  if (!valid) nameInput.html(nameInput[0].__defaultHTML)
+  const valid = text.length > 1 && text !== nameInput.__defaultText
+  toggleClass(nameWrapper, 'completed', valid)
+  if (!valid) nameInput.innerHTML = nameInput.__defaultHTML
   return valid
 }
 
 function validateEmail() {
-  let text = trim(emailInput.text())
+  let text = trim(emailInput.textContent)
   text = text.replace(emptyMarker, '')
   // NOTE: the original regex character class contains `&amp;` (HTML-encoded
   //       ampersand) — almost certainly an extraction/source artifact, but
@@ -251,17 +264,17 @@ function validateEmail() {
     /^[a-zA-Z0-9.!#$%&amp;'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
       text,
     )
-  emailWrapper.toggleClass('completed', valid)
-  if (!valid) emailInput.html(emailInput[0].__defaultHTML)
+  toggleClass(emailWrapper, 'completed', valid)
+  if (!valid) emailInput.innerHTML = emailInput.__defaultHTML
   return valid
 }
 
 function validateMessage() {
-  let text = trim(messageInput.text())
+  let text = trim(messageInput.textContent)
   text = text.replace(emptyMarker, '')
-  const valid = text.length > 0 && text !== messageInput[0].__defaultText
-  messageWrapper.toggleClass('completed', valid)
-  if (!valid) messageInput.html(messageInput[0].__defaultHTML)
+  const valid = text.length > 0 && text !== messageInput.__defaultText
+  toggleClass(messageWrapper, 'completed', valid)
+  if (!valid) messageInput.innerHTML = messageInput.__defaultHTML
   return valid
 }
 
@@ -270,7 +283,7 @@ function onBackBtn() {
 }
 
 function isTermsAccepted() {
-  return termsAcceptEl.hasClass('selected')
+  return termsAcceptEl.classList.contains('selected')
 }
 
 function onValidateBtn() {
@@ -294,23 +307,27 @@ function onValidateBtn() {
 
   const formData = new FormData()
   formData.append('ln', config.LANG)
-  formData.append('name', nameInput.text().replace(/(\u00a0|\u200b)/g, ''))
-  formData.append('email', emailInput.text().replace(/(\u00a0|\u200b)/g, ''))
-  formData.append('message', messageInput.text().replace(/(\u00a0|\u200b)/g, ''))
+  formData.append(
+    'name',
+    nameInput.textContent.replace(/(\u00a0|\u200b)/g, ''),
+  )
+  formData.append(
+    'email',
+    emailInput.textContent.replace(/(\u00a0|\u200b)/g, ''),
+  )
+  formData.append(
+    'message',
+    messageInput.textContent.replace(/(\u00a0|\u200b)/g, ''),
+  )
   formData.append('imgOffsetX', stepController.data.imgOffsetX)
   formData.append('imgOffsetY', stepController.data.imgOffsetY)
   formData.append('fileId', stepController.data.fileId)
   uiController.lock('post-submit')
-  $.ajax({
-    url: 'api/post',
-    type: 'POST',
-    dataType: 'json',
+  requestJson('api/post', {
+    method: 'POST',
     success: onPostSuccess,
     data: formData,
     error: onPostError,
-    cache: false,
-    contentType: false,
-    processData: false,
   })
 }
 
@@ -348,19 +365,19 @@ function onPostError(response) {
 }
 
 function reset() {
-  nameInput.html(nameDefaultHTML)
-  emailInput.html(emailDefaultHTML)
-  messageInput.html(messageDefaultHTML)
-  nameWrapper.removeClass('completed')
-  emailWrapper.removeClass('completed')
-  messageWrapper.removeClass('completed')
-  termsAcceptEl.removeClass('selected')
+  nameInput.innerHTML = nameDefaultHTML
+  emailInput.innerHTML = emailDefaultHTML
+  messageInput.innerHTML = messageDefaultHTML
+  toggleClass(nameWrapper, 'completed', false)
+  toggleClass(emailWrapper, 'completed', false)
+  toggleClass(messageWrapper, 'completed', false)
+  toggleClass(termsAcceptEl, 'selected', false)
   focusField('name', 0)
   validateName()
 }
 
 function hide() {
-  container.hide()
+  hideElement(container)
 }
 
 export const messageStep = {
