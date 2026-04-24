@@ -10,19 +10,17 @@ import { scene3dController } from '../controllers/scene3dController.js'
 import { trackPage } from '../controllers/trackingController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { socialShare } from '../utils/socialUtils.js'
-// NOTE: stageReference was declared as an AMD dep but never referenced in body — preserved
-import { stageReference } from '../stageReference.js' // eslint-disable-line no-unused-vars
 import { EKTweener } from '../ektweener.js'
 
 const CONTENT_WIDTH = 348
 
 let container
 // NOTE: containerStyle is assigned in preInit but never read in original — preserved
-let containerStyle
+let _containerStyle
 let imgEl
 let centerWrapper
 // NOTE: centerWrapperStyle is assigned in initElements but never read in original — preserved
-let centerWrapperStyle
+let _centerWrapperStyle
 let contentWrapper
 let shareBtn
 let closeCircleBtn
@@ -40,7 +38,7 @@ export const onHidden = new signals.Signal()
 
 function preInit() {
   container = $('.post-2d')
-  containerStyle = container[0].style
+  _containerStyle = container[0].style
   preloaderController.add(container)
 }
 
@@ -52,7 +50,7 @@ function init() {
 function initElements() {
   imgEl = $('.post-2d-img')
   centerWrapper = $('.post-2d-center-wrapper')
-  centerWrapperStyle = centerWrapper[0].style
+  _centerWrapperStyle = centerWrapper[0].style
   contentWrapper = $('.post-2d-content-wrapper')
   shareBtn = $('.post-2d-share-btn')
   matchedWrapper = $('.post-2d-matched-wrapper')

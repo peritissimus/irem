@@ -1,7 +1,5 @@
 import $ from 'jquery'
 import trim from 'mout/string/trim'
-// NOTE: mout/object/get was declared as an AMD dep but never invoked — preserved
-import get from 'mout/object/get' // eslint-disable-line no-unused-vars
 import isArray from 'mout/lang/isArray'
 import interpolate from 'mout/string/interpolate'
 import { config } from '../config.js'
@@ -241,7 +239,7 @@ function validateEmail() {
   //       preserved verbatim per project rules. Effect: literal `&`, `a`, `m`,
   //       `p`, `;` are all accepted in the local-part instead of just `&`.
   const valid =
-    /^[a-zA-Z0-9.!#$%&amp;'*+\-\/=?\^_`{|}~\-]+@[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)*$/.test(
+    /^[a-zA-Z0-9.!#$%&amp;'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
       text,
     )
   emailWrapper.toggleClass('completed', valid)

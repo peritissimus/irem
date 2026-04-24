@@ -219,7 +219,7 @@ function onInput(event) {
   let url
   let normalized = text
     .replace(' ', '-')
-    .replace(/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]/g, '-')
+    .replace(/[-!$%^&*()_+|~=`{}[\]:";'<>?,./]/g, '-')
   normalized = normalized.replace(emptyMarker, '-')
   normalized = normalized.replace(/\s+/g, '-')
   normalized = normalized.replace('--', '-')

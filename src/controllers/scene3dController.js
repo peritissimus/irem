@@ -5,14 +5,12 @@ import clamp from 'mout/math/clamp'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
 import { EKTweener } from '../ektweener.js'
-import { stepController } from './stepController.js'
 import { uiController } from './uiController.js'
 import { inputController } from './inputController.js'
 import { tutorialController } from './tutorialController.js'
 import { map } from '../scene3d/map.js'
 import { stepCircle } from '../scene3d/stepCircle.js'
 import { postSubmitCircle } from '../scene3d/postSubmitCircle.js'
-import { PostParticle } from '../scene3d/PostParticle.js'
 import { ParticleField } from '../scene3d/ParticleField.js'
 import { searchPostParticles } from '../scene3d/searchPostParticles.js'
 import { navPostParticles } from '../scene3d/navPostParticles.js'
@@ -30,18 +28,6 @@ import '../postprocessing/shaders/HorizontalTiltShiftShader.js'
 import '../postprocessing/shaders/RGBShiftShader.js'
 import '../postprocessing/shaders/VerticalTiltShiftShader.js'
 import '../postprocessing/shaders/CustomShader.js'
-
-// NOTE: original factory imported `mout/math/norm` but that mout helper throws
-// outside [min,max]. Only use case in this module was wrapped in clamp, so we
-// inline `clampedNorm` below. `lerp` is imported but actually unused in the
-// module body — preserved import (drops a useless require per the original).
-
-function clampedNorm(value, min, max) {
-  const ratio = (value - min) / (max - min)
-  if (ratio < 0) return 0
-  if (ratio > 1) return 1
-  return ratio
-}
 
 // Config-derived module locals populated in init(). Reading config at module
 // top-level would see undefined under the lazy-config rule.
@@ -62,7 +48,6 @@ let containerStyle
 let windowWidth
 let windowHeight
 let halfWidth
-let halfHeight
 let camera
 let projector
 let raycaster
@@ -81,10 +66,10 @@ let wasHasControl = false
 let pixelToUnitRatio = 1
 
 // Keyboard WASD state (not used in the default build but preserved)
-let isKeyD = false
-let isKeyS = false
-let isKeyA = false
-let isKeyW = false
+let _isKeyD = false
+let _isKeyS = false
+let _isKeyA = false
+let _isKeyW = false
 let isDragging
 
 // Vectors (created eagerly — THREE.Vector3 doesn't touch DOM)
@@ -282,16 +267,16 @@ function onKeyboard(event) {
   if (!scene3dController.hasControl && pressed) return
   switch (event.keyCode) {
     case 68:
-      isKeyD = pressed
+      _isKeyD = pressed
       break
     case 83:
-      isKeyS = pressed
+      _isKeyS = pressed
       break
     case 65:
-      isKeyA = pressed
+      _isKeyA = pressed
       break
     case 87:
-      isKeyW = pressed
+      _isKeyW = pressed
       break
   }
 }
@@ -346,7 +331,6 @@ function onResize() {
   windowWidth = window.innerWidth
   windowHeight = window.innerHeight
   halfWidth = windowWidth / 2
-  halfHeight = windowHeight / 2
 
   if (camera) {
     camera.aspect = windowWidth / windowHeight
@@ -388,9 +372,9 @@ function render() {
   scene3dController.cameraFov = camera.fov = lerp(zoom, FOV_MAX, FOV_MIN)
   camera.updateProjectionMatrix()
 
-  let horizRotationApplied = 0
-  let translateZApplied = 0
-  let translateXApplied = 0
+  let horizRotationApplied
+  let translateZApplied
+  let translateXApplied
 
   const radius = (1 - zoom) * (CAMERA_HORIZONTAL_DISTANCE - 5) + 5
 

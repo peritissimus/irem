@@ -10,8 +10,8 @@ import { EKTweener } from '../ektweener.js'
 
 let container
 // NOTE: navIconWrapper is assigned in preInit but never read in original — preserved
-let navIconWrapper
-let navMapWrapper
+let _navIconWrapper
+let _navMapWrapper
 let navMapBtn
 let navSearchWrapper
 let navSearchBtn
@@ -21,16 +21,16 @@ let navSearchItemText
 let navSearchItemCloseBtn
 let navSearchItemLine
 // NOTE: navAddWrapper is assigned in init but never read in original — preserved
-let navAddWrapper
+let _navAddWrapper
 let navAddBtn
 let navAddCircleBtn
 // NOTE: mapBtnScale is stored by scaleMapBtn but never read elsewhere — preserved
-let mapBtnScale = 1
+let _mapBtnScale = 1
 
 function preInit() {
   container = $('.nav')
   navSearchWrapper = $('.nav-search-wrapper')
-  navIconWrapper = container.find('.circle-btn-icon-wrapper')
+  _navIconWrapper = container.find('.circle-btn-icon-wrapper')
   preloaderController.add(container)
 }
 
@@ -41,14 +41,14 @@ function init() {
 
 function initElements() {
   navSearchBtn = $('.nav-search-btn')
-  navMapWrapper = $('.nav-map-wrapper')
+  _navMapWrapper = $('.nav-map-wrapper')
   navMapBtn = $('.nav-map-btn')
   navSearchCircleBtn = navSearchBtn[0].circleBtn
   navSearchItem = $('.nav-search-item')
   navSearchItemText = $('.nav-search-item-text')
   navSearchItemCloseBtn = $('.nav-search-item-close-btn')
   navSearchItemLine = $('.nav-search-item-line')
-  navAddWrapper = $('.nav-add-wrapper')
+  _navAddWrapper = $('.nav-add-wrapper')
   navAddBtn = $('.nav-add-btn')
   navAddCircleBtn = navAddBtn[0].circleBtn
 }
@@ -144,7 +144,7 @@ function hide() {
 }
 
 function scaleMapBtn(scale) {
-  mapBtnScale = scale
+  _mapBtnScale = scale
   if (navMapBtn) {
     navMapBtn[0].style[config.transform3DStyle] = `scale3d(${scale},${scale},1)`
   }

@@ -32,7 +32,7 @@ let scrollPane
 let itemsContainer
 let itemTemplate
 let albumCloseBtn
-let albumOpenBtn // NOTE: cached but never wired in original — preserved
+let _albumOpenBtn // NOTE: cached but never wired in original — preserved
 let photoBackBtn
 let photoOpenBtn
 let loadingEl
@@ -66,7 +66,7 @@ function cacheElements() {
   itemsContainer = $('.add-steps-upload-methods-items-container-inner')
   itemTemplate = $('.add-steps-upload-methods-item').remove()
   albumCloseBtn = $('.add-steps-upload-methods-album-close-btn')
-  albumOpenBtn = $('.add-steps-upload-methods-album-footer-btn-album-open')
+  _albumOpenBtn = $('.add-steps-upload-methods-album-footer-btn-album-open')
   photoBackBtn = $('.add-steps-upload-methods-album-footer-btn-photo-back')
   photoOpenBtn = $('.add-steps-upload-methods-album-footer-btn-photo-open')
   loadingEl = $('.add-steps-upload-methods-loading')

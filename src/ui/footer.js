@@ -15,7 +15,7 @@ let container
 let bg
 let langItems
 let shareBtn
-let creditsLink
+let _creditsLink
 let termsLink
 let soundBtn
 
@@ -36,7 +36,7 @@ function bindElements() {
   shareBtn = $('.footer-share')
   soundBtn = $('.footer-sound-btn')
   termsLink = $('.footer-link-terms')
-  creditsLink = $('.footer-link-credits')
+  _creditsLink = $('.footer-link-credits')
 }
 
 function bindEvents() {

@@ -42,7 +42,7 @@ let scaleRatio = 1
 let drawnWidth = 0
 let drawnHeight = 0
 // NOTE: this flag is assigned but never read in the original — preserved
-let isReady = false
+let _isReady = false
 const tweenState = { animation: 0 }
 let tutorialPlayed
 
@@ -104,7 +104,7 @@ function computeLayout() {
 
 function show() {
   renderedX = renderedY = targetX = targetY = 0
-  isReady = false
+  _isReady = false
   EKTweener.to(container, 0, { opacity: 1 })
   computeLayout()
   canvas.style.display = 'block'
@@ -114,7 +114,7 @@ function show() {
 }
 
 function hide() {
-  isReady = false
+  _isReady = false
   EKTweener.to(container, 0.5, {
     opacity: 0,
     ease: 'linear',
@@ -144,7 +144,7 @@ function startTutorialIntro() {
         stepController.showBackBtn(onBackBtn)
         stepController.showValidateBtn(onValidateBtn)
         tutorialPlayed = true
-        isReady = true
+        _isReady = true
         EKTweener.to(tweenState, 0.5, { animation: 2, ease: 'linear' })
       },
     },
@@ -289,10 +289,9 @@ function render() {
     // Frame outline rect (slow timings: 0.1-0.425 / 0.5-0.925)
     ctx.save()
     ctx.translate(CANVAS_CENTER, CANVAS_CENTER)
-    dx = 0
-    dy = 0
     if (a < 0.5) {
       t = easeInOutCos(clampedNorm(a, 0.1, 0.425))
+      dx = 0
       dy = t * 40
     } else if (a < 0.925) {
       t = easeInOutCos(clampedNorm(a, 0.5, 0.925))
@@ -330,10 +329,9 @@ function render() {
     // Frame sprite + drag-finger sprite (faster timings: 0.1-0.3 / 0.5-0.8)
     ctx.save()
     ctx.translate(CANVAS_CENTER, CANVAS_CENTER)
-    dx = 0
-    dy = 0
     if (a < 0.5) {
       t = easeInOutCos(clampedNorm(a, 0.1, 0.3))
+      dx = 0
       dy = t * 40
     } else if (a < 0.8) {
       t = easeInOutCos(clampedNorm(a, 0.5, 0.8))
@@ -347,8 +345,6 @@ function render() {
     }
     ctx.translate(dx, dy)
     drawSprite(SPRITE_FRAME)
-    dx = 0
-    dy = 0
     if (a < 0.1) {
       t = easeInOutCos(1 - clampedNorm(a, 0, 0.1))
       dx = t * 12

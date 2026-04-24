@@ -60,7 +60,7 @@ function easeOutCubic(value) {
   return value * value * value + 1
 }
 
-function easeInBack(value) {
+function _easeInBack(value) {
   return value * value * (2.70158 * value - 1.70158)
 }
 

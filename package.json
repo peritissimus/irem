@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "verify": "pnpm lint && pnpm verify:esm-graph && pnpm build",
     "verify:esm-graph": "node scripts/verify-esm-graph.mjs"
   },
   "dependencies": {

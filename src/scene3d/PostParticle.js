@@ -106,7 +106,7 @@ export class PostParticle extends THREE.Mesh {
       try {
         const url = new URL(src, location.href)
         isRemote = url.protocol !== 'data:' && url.protocol !== 'blob:' && url.origin !== location.origin
-      } catch (_err) {
+      } catch {
         isRemote = true
       }
     }

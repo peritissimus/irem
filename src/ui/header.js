@@ -5,7 +5,7 @@ import { EKTweener } from '../ektweener.js'
 
 let container
 let bg
-let fadeContainer
+let _fadeContainer
 let canvas
 let ctx
 let percentNum
@@ -19,7 +19,7 @@ const spriteRect = { x: 0, y: 356, width: 266, height: 44 }
 function preInit() {
   container = $('.header')
   bg = $('.header-bg')
-  fadeContainer = $('.header-description, .header-fade-container')
+  _fadeContainer = $('.header-description, .header-fade-container')
   preloaderController.add(container)
 }
 
