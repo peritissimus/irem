@@ -27,8 +27,7 @@ export class CircleBtn {
   }
 
   _init() {
-    const target = this.target
-    const el = target?.jquery ? target[0] : target
+    const el = this.target
     this.el = el
     el.circleBtn = this
 

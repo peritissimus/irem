@@ -30,11 +30,11 @@ export class SimpleScrollPane {
   constructor(wrapper, moveContainer, indicator) {
     this.wrapper = wrapper
     this.moveContainer = moveContainer
-    this.moveContainerStyle = moveContainer[0].style
+    this.moveContainerStyle = moveContainer.style
     this.indicator = indicator
-    this.indicatorStyle = indicator[0].style
+    this.indicatorStyle = indicator.style
 
-    wrapper[0].scrollpane = this
+    wrapper.scrollpane = this
 
     this._tPos = 0
     this._tRatio = 0
@@ -66,7 +66,7 @@ export class SimpleScrollPane {
 
   _onDown(event) {
     if (!this._isActive || this.movableHeight < 1) return
-    this.isInverted = event.target === this.indicator[0]
+    this.isInverted = event.target === this.indicator
     this.isDown = true
   }
 
@@ -125,19 +125,19 @@ export class SimpleScrollPane {
   }
 
   onResize() {
-    this.visibleHeight = this.wrapper.height()
-    this.height = this.moveContainer.height()
+    this.visibleHeight = this.wrapper.offsetHeight
+    this.height = this.moveContainer.offsetHeight
     this.movableHeight = Math.max(0, this.height - this.visibleHeight)
     this.isMovable = this.movableHeight > 0
 
     this.indicatorHeight = Math.min(1, this.visibleHeight / this.height) * this.visibleHeight
     this.indicatorMovableHeight = this.visibleHeight - this.indicatorHeight
-    this.indicator.height(this.indicatorHeight)
+    this.indicator.style.height = `${this.indicatorHeight}px`
 
-    if (this.indicator.parent()[0] === this.wrapper[0]) {
-      this.indicator.toggle(this.isMovable)
+    if (this.indicator.parentElement === this.wrapper) {
+      this.indicator.style.display = this.isMovable ? '' : 'none'
     } else {
-      this.indicator.parent().toggle(this.isMovable)
+      this.indicator.parentElement.style.display = this.isMovable ? '' : 'none'
     }
 
     this.moveToRatio(this._tRatio, 1)

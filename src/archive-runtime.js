@@ -2,9 +2,7 @@ export const UPLOADS_ROOT =
   'https://web.archive.org/web/20140624131123im_/http://i-remember.fr/uploads/'
 export const STATIC_POST_IMAGE = '/img/thumbnail.png'
 
-export function installArchiveGlobals($, signals) {
-  window.$ = $
-  window.jQuery = $
+export function installArchiveGlobals(signals) {
   window.signals = signals
   window._gaq = Array.isArray(window._gaq) ? window._gaq : []
   window.__UPLOADS_ROOT = UPLOADS_ROOT
@@ -48,8 +46,7 @@ export function installModernizrShim() {
   }
 }
 
-export function installArchiveApiShim($) {
-  const originalAjax = $.ajax.bind($)
+export function installArchiveApiShim() {
   const archivedPosts = Array.isArray(window.DEFAULT_POSTS?.data?.posts)
     ? window.DEFAULT_POSTS.data.posts
     : []
@@ -111,57 +108,6 @@ export function installArchiveApiShim($) {
       tagIndex,
       relatedTagIndex,
     )
-  }
-
-  $.ajax = function ajaxWithArchiveSupport(options) {
-    const request =
-      typeof options === 'string'
-        ? { url: options }
-        : { ...(options || {}) }
-
-    if (!request.url) {
-      return originalAjax(options)
-    }
-
-    const url = resolveArchiveRequest(request)
-    if (!url) {
-      return originalAjax(options)
-    }
-
-    const deferred = $.Deferred()
-
-    setTimeout(() => {
-      try {
-        const payload = buildArchiveResponse(
-          url,
-          request,
-          archivedPosts,
-          postIds,
-          tagIndex,
-          relatedTagIndex,
-        )
-
-        if (payload.success) {
-          request.success?.(payload)
-          deferred.resolve(payload)
-        } else {
-          request.error?.(payload)
-          deferred.reject(payload)
-        }
-      } catch (error) {
-        const payload = {
-          success: 0,
-          errorMsg: 'unexpected',
-          error,
-        }
-        request.error?.(payload)
-        deferred.reject(payload)
-      }
-    }, 0)
-
-    const promise = deferred.promise()
-    promise.abort = () => promise
-    return promise
   }
 }
 

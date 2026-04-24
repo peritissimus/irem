@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import signals from './events/signal.js'
 import { config, initConfig } from './config.js'
 import {
@@ -6,10 +5,11 @@ import {
   installArchiveGlobals,
   installModernizrShim,
 } from './archive-runtime.js'
+import { qs, qsa } from './utils/dom.js'
 
 installModernizrShim()
-installArchiveGlobals($, signals)
-installArchiveApiShim($)
+installArchiveGlobals(signals)
+installArchiveApiShim()
 
 window.__IREM_RUNTIME__ = 'esm'
 
@@ -70,19 +70,19 @@ function boot({
   stageReference.startRender()
   preloaderController.add(config.colorMapPath)
 
-  $('.scroll-wrapper').each(function setupScrollPane() {
-    const wrapper = $(this)
-    this.scrollPane = new SimpleScrollPane(
+  qsa('.scroll-wrapper').forEach((wrapper) => {
+    wrapper.scrollPane = new SimpleScrollPane(
       wrapper,
-      wrapper.find('.scroll-move-container'),
-      wrapper.find('.scroll-indicator'),
+      qs('.scroll-move-container', wrapper),
+      qs('.scroll-indicator', wrapper),
     )
-    this.scrollPane.init()
+    wrapper.scrollPane.init()
 
-    inputController.add(wrapper.find('.scroll-indicator-wrapper'), 'down', function onDown(event) {
+    inputController.add(qs('.scroll-indicator-wrapper', wrapper), 'down', function onDown(event) {
       if (event.target === event.currentTarget) {
+        const rect = event.target.getBoundingClientRect()
         this.parentNode.scrollPane.moveToRatio(
-          -(event.y - $(event.target).offset().top) / $(event.target).height(),
+          -(event.y - (rect.top + window.pageYOffset)) / event.target.offsetHeight,
         )
       }
     })

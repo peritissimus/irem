@@ -53,11 +53,7 @@ function start() {
 }
 
 function add(target, type) {
-  let resolvedTarget = target
-  if (target?.jquery) {
-    resolvedTarget = target.add(target.find('*'))
-  }
-  return quickLoader.add(resolvedTarget, type)
+  return quickLoader.add(target, type)
 }
 
 function loadSingle(url, callback, type) {

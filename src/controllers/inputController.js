@@ -50,12 +50,6 @@ export const inputController = {
 }
 
 function addInput(target, type, handler) {
-  if (target?.jquery) {
-    target.each(function attachForEach() {
-      addInput(this, type, handler)
-    })
-    return
-  }
   if (!target) return
 
   target[`__${type}`] = handler
@@ -69,12 +63,6 @@ function addInput(target, type, handler) {
 }
 
 function removeInput(target, type) {
-  if (target?.jquery) {
-    target.each(function detachForEach() {
-      removeInput(this, type)
-    })
-    return
-  }
   if (!target) return
 
   if (type) {
