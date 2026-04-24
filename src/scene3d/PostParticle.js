@@ -49,7 +49,6 @@ export class PostParticle extends THREE.Mesh {
       new THREE.PlaneBufferGeometry(size, size, 1, 1),
       new THREE.ShaderMaterial({
         uniforms,
-        attributes: {},
         vertexShader,
         fragmentShader,
         depthTest: false,
