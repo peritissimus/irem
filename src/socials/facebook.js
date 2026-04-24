@@ -1,5 +1,5 @@
-import $ from 'jquery'
 import signals from '../events/signal.js'
+import { jsonp } from '../utils/jsonp.js'
 
 // NOTE: original deps included `config` (never referenced in the body — dropped),
 // `mout/queryString/encode` (inlined as `encodeQueryString` below), and
@@ -78,11 +78,7 @@ function retrieveImages(params) {
     url = `https://web.archive.org/web/20140806221657/https://graph.facebook.com/${params.albumId}/photos`
   }
 
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    cache: false,
-    url: url + encodeQueryString(params),
+  jsonp(url + encodeQueryString(params), {
     success(response) {
       isLoading = false
       if (response.data) onRetrievedSuccess.dispatch(response)
@@ -101,13 +97,12 @@ function getImageUrl(photoId, handler, ctx) {
     return
   }
   FB.api(`/${photoId}?fields=picture`, onGotImage.bind(ctx, handler))
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    cache: false,
-    url: `https://web.archive.org/web/20140806221657/https://graph.facebook.com/${photoId}?access_token=${facebook.accessToken}`,
-    success: onGotImage.bind(ctx, handler),
-  })
+  jsonp(
+    `https://web.archive.org/web/20140806221657/https://graph.facebook.com/${photoId}?access_token=${facebook.accessToken}`,
+    {
+      success: onGotImage.bind(ctx, handler),
+    },
+  )
 }
 
 function onGotImage(handler, response) {

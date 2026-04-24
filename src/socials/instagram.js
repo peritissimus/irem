@@ -1,6 +1,6 @@
-import $ from 'jquery'
 import signals from '../events/signal.js'
 import { config } from '../config.js'
+import { jsonp } from '../utils/jsonp.js'
 
 // NOTE: original imported `mout/queryString/encode` — inlined below.
 
@@ -42,25 +42,24 @@ function fetchSelf(params) {
     onRetrievedFailed.dispatch()
     return
   }
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    cache: false,
-    url: `https://web.archive.org/web/20140806221657/https://api.instagram.com/v1/users/self${encodeQueryString(params)}`,
-    success(response) {
-      isLoading = false
-      if (response && response.data && response.data.id) {
-        selfCache = response.data
-        retrieveImages(lastParams)
-      } else {
+  jsonp(
+    `https://web.archive.org/web/20140806221657/https://api.instagram.com/v1/users/self${encodeQueryString(params)}`,
+    {
+      success(response) {
+        isLoading = false
+        if (response && response.data && response.data.id) {
+          selfCache = response.data
+          retrieveImages(lastParams)
+        } else {
+          onRetrievedFailed.dispatch()
+        }
+      },
+      error() {
+        isLoading = false
         onRetrievedFailed.dispatch()
-      }
+      },
     },
-    error() {
-      isLoading = false
-      onRetrievedFailed.dispatch()
-    },
-  })
+  )
 }
 
 function retrieveImages(params) {
@@ -81,20 +80,19 @@ function retrieveImages(params) {
     return
   }
   lastParams.access_token = instagram.token
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    cache: false,
-    url: `https://web.archive.org/web/20140806221657/https://api.instagram.com/v1/users/${selfCache.id}/media/recent${encodeQueryString(lastParams)}`,
-    success(response) {
-      isLoading = false
-      onRetrievedSuccess.dispatch(response)
+  jsonp(
+    `https://web.archive.org/web/20140806221657/https://api.instagram.com/v1/users/${selfCache.id}/media/recent${encodeQueryString(lastParams)}`,
+    {
+      success(response) {
+        isLoading = false
+        onRetrievedSuccess.dispatch(response)
+      },
+      error() {
+        isLoading = false
+        onRetrievedFailed.dispatch()
+      },
     },
-    error() {
-      isLoading = false
-      onRetrievedFailed.dispatch()
-    },
-  })
+  )
 }
 
 // OAuth popup redirects back to `/api/instagram-token-callback` which calls
