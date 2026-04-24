@@ -257,12 +257,8 @@ function init() {
   initDevGUI()
 }
 
-// NOTE: original uses `if (config.IS_DEV && !0)` — `!0` is always true, so
-// this always runs under IS_DEV. Requires `window.dat` (dat.GUI) to be loaded
-// as a global. Preserved behaviour — if dat isn't present it'll throw, same
-// as the original would have.
 function initDevGUI() {
-  if (!config.IS_DEV) return
+  if (!config.IS_DEV || !window.dat?.GUI) return
   const gui = new window.dat.GUI()
   const actions = {
     play() {
