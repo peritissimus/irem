@@ -2,7 +2,7 @@ import $ from 'jquery'
 import clamp from 'mout/math/clamp'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original imported `mout/math/norm` which throws outside [min, max]
 // (differs from the archived bundle). Replaced with the local
@@ -115,7 +115,8 @@ function show() {
   if (tutorialController.allCompleted) return
   lastTime = +new Date()
   container.show()
-  EKTweener.to(container, 0.5, { opacity: 1, ease: 'linear' })
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], { duration: 0.5, opacity: 1, ease: 'none' })
   switchToPage(firstUncompleted())
   stageReference.onRender.add(renderTick)
 }
@@ -366,9 +367,11 @@ function drawArrow(ctx, t) {
 
 function hide() {
   stageReference.onRender.remove(renderTick)
-  EKTweener.to(container, 0.5, {
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], {
+    duration: 0.5,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       container.hide()
     },
@@ -385,11 +388,13 @@ function switchToPage(pageEl) {
   currentPage = pageEl
   currentPageId = pageEl.__id
   frameCounts[currentPageId] = 0
-  EKTweener.to(pageEl, 0.3, { opacity: 1, ease: 'linear' })
+  animator.killTweensOf(pageEl, 'opacity')
+  animator.to(pageEl, { duration: 0.3, opacity: 1, ease: 'none' })
 }
 
 function fadeOutPage(pageEl) {
-  EKTweener.to(pageEl, 0.3, { opacity: 0, ease: 'linear' })
+  animator.killTweensOf(pageEl, 'opacity')
+  animator.to(pageEl, { duration: 0.3, opacity: 0, ease: 'none' })
 }
 
 export const tutorialController = {
