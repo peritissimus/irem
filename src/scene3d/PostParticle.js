@@ -3,7 +3,7 @@ import { uiController } from '../controllers/uiController.js'
 import { evalReplace } from '../utils/stringUtils.js'
 import mixIn from 'mout/object/mixIn'
 import THREE from '../libs/threejs/Three.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 import vertexShaderSource from '../shaders/postParticle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postParticle/fragment.glsl?raw'
 
@@ -119,13 +119,15 @@ export class PostParticle extends THREE.Mesh {
     this._renderDepth = this.renderDepth
     this.renderDepth = -99999
     const pop = this.uniforms.pop
-    EKTweener.to(pop, (1 - pop.value) * 0.3, { value: 1 })
+    animator.killTweensOf(pop, 'value')
+    animator.to(pop, { duration: (1 - pop.value) * 0.3, value: 1 })
   }
 
   onOut() {
     this.renderDepth = this._renderDepth
     const pop = this.uniforms.pop
-    EKTweener.to(pop, pop.value * 0.3, { value: 0 })
+    animator.killTweensOf(pop, 'value')
+    animator.to(pop, { duration: pop.value * 0.3, value: 0 })
   }
 
   onClick() {
