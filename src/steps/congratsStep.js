@@ -6,7 +6,7 @@ import { scene3dController } from '../controllers/scene3dController.js'
 import { stepController } from '../controllers/stepController.js'
 import { inputController } from '../controllers/inputController.js'
 import { socialShare } from '../utils/socialUtils.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original AMD factory listed `scene3d/stepCircle` as a dep but body
 // never used it. Also captured `t.transform3DStyle` as a module-load local —
@@ -56,9 +56,11 @@ function show() {
   stepController.disableValidateBtn()
   stepController.hideBackBtn()
   stepController.hideValidateBtn()
-  EKTweener.to(postSubmitCircle.uniforms.animation, 8, {
+  animator.killTweensOf(postSubmitCircle.uniforms.animation, 'value')
+  animator.to(postSubmitCircle.uniforms.animation, {
+    duration: 8,
     value: 5,
-    ease: 'linear',
+    ease: 'none',
   })
   scene3dController.resetCamera({
     lockControl: true,
@@ -67,10 +69,12 @@ function show() {
     lookAt: { delay: 1.5 },
     camera: { delay: 1.5 },
   })
-  EKTweener.to(container, 0, {
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], {
+    duration: 0,
     opacity: 1,
     delay: 4,
-    ease: 'linear',
+    ease: 'none',
     onStart() {
       isShown = true
     },
@@ -81,8 +85,11 @@ function show() {
 }
 
 function hide() {
-  EKTweener.to(container, 1, {
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], {
+    duration: 1,
     opacity: 0,
+    ease: 'circ.out',
     onComplete() {
       container.hide()
       stepController.hide()

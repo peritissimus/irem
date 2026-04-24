@@ -1,6 +1,6 @@
 import signals from '../events/signal.js'
 import { quickLoader } from '../loader/quickLoader.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 const SKIP_ANIMATION = true
 
@@ -19,8 +19,11 @@ function makeProgressHandler(loadingSig, loadedSig, completeSig, animationDurati
 
   const tweenState = { percent: 0 }
   return (value) => {
-    EKTweener.to(tweenState, duration, {
+    animator.killTweensOf(tweenState, 'percent')
+    animator.to(tweenState, {
+      duration,
       percent: value,
+      ease: 'circ.out',
       onUpdate: () => direct(tweenState.percent),
     })
     if (value === 1) loadedSig.dispatch()
