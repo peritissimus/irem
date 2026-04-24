@@ -1,6 +1,6 @@
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
-import clamp from 'mout/math/clamp'
+import { clamp } from '../utils/native.js'
 import THREE from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/postSubmitCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postSubmitCircle/fragment.glsl?raw'

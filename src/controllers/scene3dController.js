@@ -1,7 +1,5 @@
 import $ from 'jquery'
-import deepMixIn from 'mout/object/deepMixIn'
-import lerp from 'mout/math/lerp'
-import clamp from 'mout/math/clamp'
+import { deepMixIn, lerp, clamp } from '../utils/native.js'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
 import { animator } from '../animation/animator.js'

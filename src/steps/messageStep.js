@@ -1,7 +1,5 @@
 import $ from 'jquery'
-import trim from 'mout/string/trim'
-import isArray from 'mout/lang/isArray'
-import interpolate from 'mout/string/interpolate'
+import { trim, isArray, interpolate } from '../utils/native.js'
 import { config } from '../config.js'
 import { stepController } from '../controllers/stepController.js'
 import { inputController } from '../controllers/inputController.js'

@@ -1,6 +1,5 @@
 import $ from 'jquery'
-import trim from 'mout/string/trim'
-import interpolate from 'mout/string/interpolate'
+import { trim, interpolate } from '../utils/native.js'
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'
 import { inputController } from '../controllers/inputController.js'

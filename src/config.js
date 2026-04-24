@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import rtrim from 'mout/string/rtrim'
+import { rtrim } from './utils/native.js'
 
 export const config = {}
 

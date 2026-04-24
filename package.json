@@ -16,7 +16,6 @@
   "dependencies": {
     "gsap": "^3.15.0",
     "jquery": "1.11.1",
-    "mout": "1.2.4",
     "three": "^0.71.0"
   },
   "devDependencies": {

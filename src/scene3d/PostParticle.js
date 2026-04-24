@@ -1,7 +1,7 @@
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'
 import { evalReplace } from '../utils/stringUtils.js'
-import mixIn from 'mout/object/mixIn'
+import { mixIn } from '../utils/native.js'
 import THREE from '../libs/threejs/Three.js'
 import { animator } from '../animation/animator.js'
 import vertexShaderSource from '../shaders/postParticle/vertex.glsl?raw'

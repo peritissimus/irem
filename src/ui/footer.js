@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import setParam from 'mout/queryString/setParam'
+import { setParam } from '../utils/native.js'
 import { config } from '../config.js'
 import { inputController } from '../controllers/inputController.js'
 import { uiController } from '../controllers/uiController.js'

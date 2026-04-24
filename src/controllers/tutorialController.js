@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import clamp from 'mout/math/clamp'
+import { clamp } from '../utils/native.js'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
 import { animator } from '../animation/animator.js'

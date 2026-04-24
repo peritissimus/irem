@@ -1,7 +1,8 @@
 import $ from 'jquery'
-import clamp from 'mout/math/clamp'
-// NOTE: mout/math/lerp was declared as an AMD dep but never invoked — preserved
-import lerp from 'mout/math/lerp' // eslint-disable-line no-unused-vars
+// NOTE: `lerp` was declared as an AMD dep but never invoked in the original —
+// preserved in the named import list to match the legacy import surface.
+// eslint-disable-next-line no-unused-vars
+import { clamp, lerp } from '../utils/native.js'
 // NOTE: original imported `mout/math/norm`, but that mout helper throws outside
 //       [min,max]. The original always wrapped it in a clamp anyway, so we
 //       inline a clampedNorm helper here per project convention.

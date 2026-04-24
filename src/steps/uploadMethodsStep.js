@@ -1,6 +1,5 @@
 import $ from 'jquery'
-import bind from 'mout/function/bind'
-import get from 'mout/object/get'
+import { bind, get } from '../utils/native.js'
 import { config } from '../config.js'
 import { stepCircle } from '../scene3d/stepCircle.js'
 import { stepController } from '../controllers/stepController.js'

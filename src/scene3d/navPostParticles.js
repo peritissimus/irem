@@ -3,7 +3,7 @@ import { PostParticle } from './PostParticle.js'
 import { postController } from '../controllers/postController.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
-import lerp from 'mout/math/lerp'
+import { lerp } from '../utils/native.js'
 import THREE from '../libs/threejs/Three.js'
 
 const maxNewItemsPerFrame = 20
