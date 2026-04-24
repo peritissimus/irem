@@ -4,7 +4,7 @@ import lerp from 'mout/math/lerp'
 import clamp from 'mout/math/clamp'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 import { uiController } from './uiController.js'
 import { inputController } from './inputController.js'
 import { tutorialController } from './tutorialController.js'
@@ -28,6 +28,35 @@ import '../postprocessing/shaders/HorizontalTiltShiftShader.js'
 import '../postprocessing/shaders/RGBShiftShader.js'
 import '../postprocessing/shaders/VerticalTiltShiftShader.js'
 import '../postprocessing/shaders/CustomShader.js'
+
+// NOTE: callers of moveTo/resetCamera pass ease strings using EKTweener's
+// naming convention (e.g. 'easeInOutSine', 'easeOutSine', 'linear'). Map them
+// to gsap equivalents here so call-sites don't need to change.
+const EASE_MAP = {
+  linear: 'none',
+  easeOutCirc: 'circ.out',
+  easeInOutCirc: 'circ.inOut',
+  easeInCirc: 'circ.in',
+  easeOutQuad: 'power1.out',
+  easeInOutQuad: 'power1.inOut',
+  easeInQuad: 'power1.in',
+  easeOutCubic: 'power2.out',
+  easeInOutCubic: 'power2.inOut',
+  easeInCubic: 'power2.in',
+  easeOutQuart: 'power3.out',
+  easeInOutQuart: 'power3.inOut',
+  easeOutExpo: 'expo.out',
+  easeInExpo: 'expo.in',
+  easeOutSine: 'sine.out',
+  easeInOutSine: 'sine.inOut',
+  easeInSine: 'sine.in',
+  easeOutBack: 'back.out',
+}
+
+function mapEase(ease) {
+  if (!ease) return ease
+  return EASE_MAP[ease] || ease
+}
 
 // Config-derived module locals populated in init(). Reading config at module
 // top-level would see undefined under the lazy-config rule.
@@ -221,9 +250,11 @@ function init() {
   stageReference.onResize.add(onResize)
   stageReference.onRender.add(render)
 
-  EKTweener.to(customShaderPass.uniforms.alpha, 3, {
+  animator.killTweensOf(customShaderPass.uniforms.alpha, 'value')
+  animator.to(customShaderPass.uniforms.alpha, {
+    duration: 3,
     value: config.DEFAULT_NOISE_RATIO,
-    ease: 'linear',
+    ease: 'none',
   })
 
   updateFading()
@@ -246,10 +277,10 @@ function initDevGUI() {
       fakeParticles.uniforms.cameraVector.value.copy(
         vector.multiplyScalar(CAMERA_HORIZONTAL_DISTANCE),
       )
-      EKTweener.killTweensOf(fakeParticles)
-      EKTweener.to(fakeParticles, 0, { time: 0, fade: 0 })
-      EKTweener.to(fakeParticles, 15, { time: 1, ease: 'easeOutSine' })
-      EKTweener.to(fakeParticles, 0.5, { fade: 1, ease: 'linear' })
+      animator.killTweensOf(fakeParticles)
+      animator.set(fakeParticles, { time: 0, fade: 0 })
+      animator.to(fakeParticles, { duration: 15, time: 1, ease: 'sine.out' })
+      animator.to(fakeParticles, { duration: 0.5, fade: 1, ease: 'none' })
     },
   }
   const folder = gui.addFolder('fakeParticles')
@@ -627,9 +658,12 @@ function hideSearchedPosts() {
 function showParticles() {
   const ratio = config.settings.fading / 100
   for (let i = 0, len = GRID_SEG * GRID_SEG; i < len; i += 1) {
-    EKTweener.to(particleFields[i].uniforms.fading, 5, {
+    const fading = particleFields[i].uniforms.fading
+    animator.killTweensOf(fading, 'value')
+    animator.to(fading, {
+      duration: 5,
       value: ratio,
-      ease: 'linear',
+      ease: 'none',
     })
   }
 }
@@ -656,40 +690,45 @@ function moveTo(opts) {
   }
 
   if (opts.controller) {
-    opts.controller.ease = opts.controller.ease || 'linear'
+    opts.controller.ease = mapEase(opts.controller.ease || 'linear')
     if (opts.controller.duration !== undefined) {
       duration = opts.controller.duration
       delete opts.controller.duration
     } else {
       duration = totalDuration
     }
-    EKTweener.to(scene3dController, duration, opts.controller)
+    animator.killTweensOf(scene3dController)
+    animator.to(scene3dController, { duration, ...opts.controller })
   }
 
   if (opts.camera) {
-    opts.camera.ease = opts.camera.ease || 'easeInOutSine'
+    opts.camera.ease = mapEase(opts.camera.ease || 'easeInOutSine')
     if (opts.camera.duration !== undefined) {
       duration = opts.camera.duration
       delete opts.camera.duration
     } else {
       duration = totalDuration
     }
-    EKTweener.to(cameraTargetPosition, duration, opts.camera)
-    EKTweener.to(cameraPosOffset, duration, {
+    animator.killTweensOf(cameraTargetPosition)
+    animator.to(cameraTargetPosition, { duration, ...opts.camera })
+    animator.killTweensOf(cameraPosOffset, 'a')
+    animator.to(cameraPosOffset, {
+      duration,
       a: opts.cameraOffsetAnimation === undefined ? 0 : opts.cameraOffsetAnimation,
-      ease: 'linear',
+      ease: 'none',
     })
   }
 
   if (opts.lookAt) {
-    opts.lookAt.ease = opts.lookAt.ease || 'easeOutSine'
+    opts.lookAt.ease = mapEase(opts.lookAt.ease || 'easeOutSine')
     if (opts.lookAt.duration !== undefined) {
       duration = opts.lookAt.duration
       delete opts.lookAt.duration
     } else {
       duration = totalDuration
     }
-    EKTweener.to(lookAtTargetPosition, duration, opts.lookAt)
+    animator.killTweensOf(lookAtTargetPosition)
+    animator.to(lookAtTargetPosition, { duration, ...opts.lookAt })
   }
 }
 
@@ -730,16 +769,16 @@ function enableControl(canInteract) {
   scene3dController.hasControl = true
   scene3dController.canInteractiveWithPost =
     canInteract === undefined ? true : canInteract
-  EKTweener.killTweensOf(scene3dController)
-  EKTweener.killTweensOf(cameraTargetPosition)
-  EKTweener.killTweensOf(lookAtTargetPosition)
+  animator.killTweensOf(scene3dController)
+  animator.killTweensOf(cameraTargetPosition)
+  animator.killTweensOf(lookAtTargetPosition)
   tutorialController.show()
 }
 
 function disableControl(canInteract) {
-  EKTweener.killTweensOf(scene3dController)
-  EKTweener.killTweensOf(cameraTargetPosition)
-  EKTweener.killTweensOf(lookAtTargetPosition)
+  animator.killTweensOf(scene3dController)
+  animator.killTweensOf(cameraTargetPosition)
+  animator.killTweensOf(lookAtTargetPosition)
   scene3dController.hasControl = false
   scene3dController.canInteractiveWithPost =
     canInteract === undefined ? false : canInteract
