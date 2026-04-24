@@ -1,7 +1,7 @@
-import $ from 'jquery'
 import signals from '../events/signal.js'
 import { config } from '../config.js'
 import { Post } from '../posts/Post.js'
+import { jsonp } from '../utils/jsonp.js'
 
 // NOTE: original factory listed `uiController`, `inputController`, and
 // `widgets/SimpleScrollPane` as deps — none were referenced in the body.
@@ -40,19 +40,19 @@ function loadMore() {
   loadMorePrevLength = list.length
   const lastId =
     list && loadMorePrevLength > 0 ? list[loadMorePrevLength - 1].id : -1
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    url: `api/search-posts?ln=${config.LANG}&lastId=${lastId}&tagName=&callback=?`,
-    success(response) {
-      isLoading = false
-      processResponse(response, true)
-      takeIndex = loadMorePrevLength
+  jsonp(
+    `api/search-posts?ln=${config.LANG}&lastId=${lastId}&tagName=&callback=?`,
+    {
+      success(response) {
+        isLoading = false
+        processResponse(response, true)
+        takeIndex = loadMorePrevLength
+      },
+      error() {
+        isLoading = false
+      },
     },
-    error() {
-      isLoading = false
-    },
-  })
+  )
 }
 
 function searchPosts(rawTag) {
@@ -77,15 +77,17 @@ function searchPosts(rawTag) {
   // NOTE: original computed a `lastId` local here from the existing pool but
   // never used it in the URL — dead work, dropped.
 
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    url: `api/search-posts${tag === '' ? '' : `/${tag}`}?ln=${config.LANG}&tagName=${tag}&callback=?`,
-    success(response) {
-      processResponse(response)
+  jsonp(
+    `api/search-posts${tag === '' ? '' : `/${tag}`}?ln=${config.LANG}&tagName=${tag}&callback=?`,
+    {
+      success(response) {
+        processResponse(response)
+      },
+      error() {
+        onSearchError({ input: { tagName: tag } })
+      },
     },
-    error: onSearchError,
-  })
+  )
 }
 
 function onSearchError(response) {
@@ -158,10 +160,7 @@ function parseSubmittedPost(data) {
 }
 
 function searchRelatedTags(post, callback) {
-  $.ajax({
-    type: 'GET',
-    dataType: 'jsonp',
-    url: `api/related-post-count/${post.id}?ln=${config.LANG}&callback=?`,
+  jsonp(`api/related-post-count/${post.id}?ln=${config.LANG}&callback=?`, {
     success(response) {
       if (response && response.success) post.tags = response.data
       callback(post)

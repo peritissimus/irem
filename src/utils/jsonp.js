@@ -3,6 +3,12 @@ function makeCallbackName() {
 }
 
 function withCallback(url, callbackName) {
+  if (/[?&]callback=\?/.test(url)) {
+    return url.replace(
+      /([?&]callback=)\?/,
+      `$1${encodeURIComponent(callbackName)}`,
+    )
+  }
   const separator = url.includes('?') ? '&' : '?'
   return `${url}${separator}callback=${encodeURIComponent(callbackName)}`
 }
