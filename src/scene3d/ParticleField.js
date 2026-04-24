@@ -48,18 +48,21 @@ export class ParticleField {
   }
 
   _createGeometry() {
-    const geometry = (this.geometry = new THREE.Geometry())
-    const vertices = geometry.vertices
+    const geometry = (this.geometry = new THREE.BufferGeometry())
     const segmentSize = config.PARTICLE_FIELD_SEGMENT_SIZE
     const gridSize = config.PARTICLE_FIELD_GRID_SIZE
     const spacing = gridSize / segmentSize
-
+    const positions = new Float32Array(segmentSize * segmentSize * 3)
+    let i = 0
     for (let x = 0; x < segmentSize; x++) {
       const px = x * spacing
       for (let z = 0; z < segmentSize; z++) {
-        vertices.push(new THREE.Vector3(px, 0, z * spacing))
+        positions[i++] = px
+        positions[i++] = 0
+        positions[i++] = z * spacing
       }
     }
+    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
     this.particles = new THREE.PointCloud(geometry, this.material)
   }
 
