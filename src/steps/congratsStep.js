@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { postSubmitCircle } from '../scene3d/postSubmitCircle.js'
 import { soundController } from '../controllers/soundController.js'
@@ -7,6 +6,7 @@ import { stepController } from '../controllers/stepController.js'
 import { inputController } from '../controllers/inputController.js'
 import { socialShare } from '../utils/socialUtils.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs } from '../utils/dom.js'
 
 // NOTE: original AMD factory listed `scene3d/stepCircle` as a dep but body
 // never used it. Also captured `t.transform3DStyle` as a module-load local —
@@ -23,8 +23,8 @@ function init() {
 }
 
 function cacheElements() {
-  container = $('.add-steps-congrats')
-  shareBtn = $('.add-steps-congrats-share')
+  container = qs('.add-steps-congrats')
+  shareBtn = qs('.add-steps-congrats-share')
 }
 
 function bindEvents() {
@@ -39,8 +39,7 @@ function onBGClick() {
 }
 
 function onShareClick() {
-  const $btn = $(this)
-  const type = $btn.data('type')
+  const type = this.dataset.type
   socialShare(
     type,
     '/memory/' + (parseInt(stepController.data.id, 10) + config.POST_ID_OFFSET),
@@ -50,7 +49,7 @@ function onShareClick() {
 
 function show() {
   isShown = false
-  container.css('display', 'table')
+  container.style.display = 'table'
   soundController.playAdd()
   stepController.disableBackBtn()
   stepController.disableValidateBtn()
@@ -69,8 +68,8 @@ function show() {
     lookAt: { delay: 1.5 },
     camera: { delay: 1.5 },
   })
-  animator.killTweensOf(container[0], 'opacity')
-  animator.to(container[0], {
+  animator.killTweensOf(container, 'opacity')
+  animator.to(container, {
     duration: 0,
     opacity: 1,
     delay: 4,
@@ -85,13 +84,13 @@ function show() {
 }
 
 function hide() {
-  animator.killTweensOf(container[0], 'opacity')
-  animator.to(container[0], {
+  animator.killTweensOf(container, 'opacity')
+  animator.to(container, {
     duration: 1,
     opacity: 0,
     ease: 'circ.out',
     onComplete() {
-      container.hide()
+      hideElement(container)
       stepController.hide()
     },
   })

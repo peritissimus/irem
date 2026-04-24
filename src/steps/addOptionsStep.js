@@ -1,7 +1,7 @@
-import $ from 'jquery'
 import { stepCircle } from '../scene3d/stepCircle.js'
 import { stepController } from '../controllers/stepController.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs, show as showElement } from '../utils/dom.js'
 
 // NOTE: original AMD factory also captured `t.transform3DStyle` as a
 // module-load local — never used in body. Dropped along with the lazy-config
@@ -18,16 +18,16 @@ function init() {
 }
 
 function cacheElements() {
-  container = $('.add-steps-add-options')
-  shareBtn = $('.add-steps-add-options-share')
-  lookBtn = $('.add-steps-add-options-look')
+  container = qs('.add-steps-add-options')
+  shareBtn = qs('.add-steps-add-options-share')
+  lookBtn = qs('.add-steps-add-options-look')
 }
 
 function bindEvents() {
-  shareBtn[0].circleBtn.onOvered.add(onShareOver)
-  shareBtn[0].circleBtn.onOuted.add(onShareOut)
-  shareBtn[0].circleBtn.onClicked.add(onShareClick)
-  lookBtn[0].circleBtn.onClicked.add(onLookClick)
+  shareBtn.circleBtn.onOvered.add(onShareOver)
+  shareBtn.circleBtn.onOuted.add(onShareOut)
+  shareBtn.circleBtn.onClicked.add(onShareClick)
+  lookBtn.circleBtn.onClicked.add(onLookClick)
 }
 
 function onShareOver() {
@@ -67,11 +67,11 @@ function onLookClick() {
 
 function show() {
   isAdvancing = false
-  container.show()
+  showElement(container)
 }
 
 function hide() {
-  container.hide()
+  hideElement(container)
 }
 
 export const addOptionsStep = {
