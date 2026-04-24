@@ -2,7 +2,7 @@ import $ from 'jquery'
 import { inputController } from '../controllers/inputController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { stageReference } from '../stageReference.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let container
 let wrapper
@@ -45,12 +45,7 @@ function show() {
   if (isVisible) return
   isVisible = true
   container.show()
-  EKTweener.fromTo(
-    wrapper,
-    0.5,
-    { transform3d: 'translate3d(332px,0,0)' },
-    { transform3d: 'translate3d(0,0,0)' },
-  )
+  animator.fromTo(wrapper[0], { x: 332 }, { duration: 0.5, x: 0, ease: 'circ.out' })
   stageReference.onResize.add(onStageResize)
   onStageResize()
 }
@@ -58,8 +53,10 @@ function show() {
 function hide() {
   if (!isVisible) return
   isVisible = false
-  EKTweener.to(wrapper, 0.5, {
-    transform3d: 'translate3d(332px,0,0)',
+  animator.to(wrapper[0], {
+    duration: 0.5,
+    x: 332,
+    ease: 'circ.out',
     onComplete: () => {
       container.hide()
     },
