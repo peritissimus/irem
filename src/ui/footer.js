@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { setParam } from '../utils/native.js'
 import { config } from '../config.js'
 import { inputController } from '../controllers/inputController.js'
@@ -8,6 +7,7 @@ import { trackEvent, trackPage } from '../controllers/trackingController.js'
 import { socialShare } from '../utils/socialUtils.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { animator } from '../animation/animator.js'
+import { qs, qsa, setHeight, show as showElement, toggleClass, withDescendants } from '../utils/dom.js'
 
 const trackHandlers = { trackPage, trackEvent }
 
@@ -20,8 +20,8 @@ let termsLink
 let soundBtn
 
 function preInit() {
-  container = $('.footer')
-  preloaderController.add(container)
+  container = qs('.footer')
+  preloaderController.add(withDescendants(container))
 }
 
 function init() {
@@ -31,30 +31,31 @@ function init() {
 }
 
 function bindElements() {
-  bg = $('.footer-bg')
-  langItems = $('.footer-link-lang-item:not(.selected)')
-  shareBtn = $('.footer-share')
-  soundBtn = $('.footer-sound-btn')
-  termsLink = $('.footer-link-terms')
-  _creditsLink = $('.footer-link-credits')
+  bg = qs('.footer-bg')
+  langItems = qsa('.footer-link-lang-item:not(.selected)')
+  shareBtn = qsa('.footer-share')
+  soundBtn = qs('.footer-sound-btn')
+  termsLink = qs('.footer-link-terms')
+  _creditsLink = qs('.footer-link-credits')
 }
 
 function bindEvents() {
-  inputController.add(shareBtn, 'click', onShareClick)
-  inputController.add(langItems, 'click', onLangClick)
+  shareBtn.forEach((node) => inputController.add(node, 'click', onShareClick))
+  langItems.forEach((node) => inputController.add(node, 'click', onLangClick))
   inputController.add(soundBtn, 'click', onSoundClick)
   inputController.add(termsLink, 'click', onTermsClick)
   // NOTE: original never wires creditsLink to onCreditsClick — dead fn preserved below
-  container.find('.track-link').each(function () {
-    inputController.add(this, 'click', onTrackLinkClick)
-    this._url = $(this).attr('href')
-    $(this).css('cursor', 'pointer').removeAttr('href')
+  qsa('.track-link', container).forEach((link) => {
+    inputController.add(link, 'click', onTrackLinkClick)
+    link._url = link.getAttribute('href')
+    link.style.cursor = 'pointer'
+    link.removeAttribute('href')
   })
   soundController.onMuteToggled.add(onMuteToggled)
 }
 
 function onMuteToggled(muted) {
-  soundBtn.toggleClass('selected', !muted)
+  toggleClass(soundBtn, 'selected', !muted)
 }
 
 function onSoundClick() {
@@ -73,17 +74,15 @@ function onTermsClick() {
 
 function onTrackLinkClick(e) {
   e.preventDefault()
-  const $link = $(this)
-  const trackType = $link.data('trackType')
+  const trackType = this.dataset.trackType
   const data = {}
-  data[trackType === 'trackPage' ? 'trackPage' : 'trackCat'] = $link.data('trackValue')
+  data[trackType === 'trackPage' ? 'trackPage' : 'trackCat'] = this.dataset.trackValue
   trackHandlers[trackType](data)
   if (this._url) window.open(this._url)
 }
 
 function onShareClick() {
-  const $btn = $(this)
-  const type = $btn.data('type')
+  const type = this.dataset.type
   socialShare(
     type,
     '',
@@ -92,30 +91,31 @@ function onShareClick() {
 }
 
 function show() {
-  container.show()
-  animator.fromTo(container[0], { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
+  showElement(container)
+  animator.fromTo(container, { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
 }
 
 function showBg() {
-  animator.to(bg[0], { duration: 1.3, scaleY: 1, ease: 'circ.out' })
+  animator.to(bg, { duration: 1.3, scaleY: 1, ease: 'circ.out' })
 }
 
 function hideBg() {
-  animator.to(bg[0], { duration: 1.3, scaleY: 0, ease: 'circ.out' })
+  animator.to(bg, { duration: 1.3, scaleY: 0, ease: 'circ.out' })
 }
 
 function updateFading(ratio) {
-  $('head').append(`<style>.footer-fade-item{opacity: ${ratio * 0.5}}</style>`)
+  const style = document.createElement('style')
+  style.textContent = `.footer-fade-item{opacity: ${ratio * 0.5}}`
+  document.head.append(style)
 }
 
 function changeHeight(height) {
-  container.height(height)
+  setHeight(container, height)
 }
 
 function onLangClick() {
-  const $item = $(this)
-  const langId = $item.data('id')
-  const urlSuffix = $item.data('urlSuffix')
+  const langId = this.dataset.id
+  const urlSuffix = this.dataset.urlSuffix
   const queryString = window.location.href.split('?')[1]
   trackEvent({ trackCat: 'footer-langselector' })
   setTimeout(() => {

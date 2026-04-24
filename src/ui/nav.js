@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { inputController } from '../controllers/inputController.js'
@@ -7,6 +6,7 @@ import { uiController } from '../controllers/uiController.js'
 import { stepController } from '../controllers/stepController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs, show as showElement, setText, toggleClass, withDescendants } from '../utils/dom.js'
 
 let container
 // NOTE: navIconWrapper is assigned in preInit but never read in original — preserved
@@ -28,10 +28,10 @@ let navAddCircleBtn
 let _mapBtnScale = 1
 
 function preInit() {
-  container = $('.nav')
-  navSearchWrapper = $('.nav-search-wrapper')
-  _navIconWrapper = container.find('.circle-btn-icon-wrapper')
-  preloaderController.add(container)
+  container = qs('.nav')
+  navSearchWrapper = qs('.nav-search-wrapper')
+  _navIconWrapper = qs('.circle-btn-icon-wrapper', container)
+  preloaderController.add(withDescendants(container))
 }
 
 function init() {
@@ -40,17 +40,17 @@ function init() {
 }
 
 function initElements() {
-  navSearchBtn = $('.nav-search-btn')
-  _navMapWrapper = $('.nav-map-wrapper')
-  navMapBtn = $('.nav-map-btn')
-  navSearchCircleBtn = navSearchBtn[0].circleBtn
-  navSearchItem = $('.nav-search-item')
-  navSearchItemText = $('.nav-search-item-text')
-  navSearchItemCloseBtn = $('.nav-search-item-close-btn')
-  navSearchItemLine = $('.nav-search-item-line')
-  _navAddWrapper = $('.nav-add-wrapper')
-  navAddBtn = $('.nav-add-btn')
-  navAddCircleBtn = navAddBtn[0].circleBtn
+  navSearchBtn = qs('.nav-search-btn')
+  _navMapWrapper = qs('.nav-map-wrapper')
+  navMapBtn = qs('.nav-map-btn')
+  navSearchCircleBtn = navSearchBtn.circleBtn
+  navSearchItem = qs('.nav-search-item')
+  navSearchItemText = qs('.nav-search-item-text')
+  navSearchItemCloseBtn = qs('.nav-search-item-close-btn')
+  navSearchItemLine = qs('.nav-search-item-line')
+  _navAddWrapper = qs('.nav-add-wrapper')
+  navAddBtn = qs('.nav-add-btn')
+  navAddCircleBtn = navAddBtn.circleBtn
 }
 
 function initEvents() {
@@ -82,7 +82,11 @@ function onMapBtnClick(event) {
 
   const horizontalDist = config.SCENE_CAMERA_HORIZONTAL_DISTANCE
   const verticalBase = config.SCENE_CAMERA_VERTICAL_BASE_DISTANCE
-  const offset = navMapBtn.offset()
+  const rect = navMapBtn.getBoundingClientRect()
+  const offset = {
+    left: rect.left + window.pageXOffset,
+    top: rect.top + window.pageYOffset,
+  }
   const nx = (event.x - offset.left) / 46 - 1
   const ny = (event.y - offset.top) / 46 - 1
   const cameraTargetPosition = scene3dController.cameraTargetPosition
@@ -135,18 +139,18 @@ function onAddBtnClicked() {
 
 function show() {
   scene3dController.showMap()
-  container.show()
+  showElement(container)
 }
 
 function hide() {
   scene3dController.hideMap()
-  container.hide()
+  hideElement(container)
 }
 
 function scaleMapBtn(scale) {
   _mapBtnScale = scale
   if (navMapBtn) {
-    navMapBtn[0].style[config.transform3DStyle] = `scale3d(${scale},${scale},1)`
+    navMapBtn.style[config.transform3DStyle] = `scale3d(${scale},${scale},1)`
   }
 }
 
@@ -155,30 +159,30 @@ function updateFading(_value) {
 }
 
 function showSearchItem(text) {
-  navSearchWrapper.addClass('has-item')
-  navSearchItem.show()
-  navSearchItemText.text(text)
-  animator.killTweensOf(navSearchItem[0], 'opacity')
-  animator.fromTo(navSearchItem[0], { opacity: 0 }, { duration: 0.2, opacity: 1, ease: 'none' })
-  animator.killTweensOf(navSearchItemLine[0], 'width')
-  animator.set(navSearchItemLine[0], { width: 0 })
-  animator.to(navSearchItemLine[0], {
+  toggleClass(navSearchWrapper, 'has-item', true)
+  showElement(navSearchItem)
+  setText(navSearchItemText, text)
+  animator.killTweensOf(navSearchItem, 'opacity')
+  animator.fromTo(navSearchItem, { opacity: 0 }, { duration: 0.2, opacity: 1, ease: 'none' })
+  animator.killTweensOf(navSearchItemLine, 'width')
+  animator.set(navSearchItemLine, { width: 0 })
+  animator.to(navSearchItemLine, {
     duration: 0.2,
     delay: 0.15,
-    width: navSearchItem.width(),
+    width: navSearchItem.offsetWidth,
     ease: 'circ.out',
   })
 }
 
 function hideSearchItem() {
-  navSearchWrapper.removeClass('has-item')
-  animator.killTweensOf(navSearchItem[0], 'opacity')
-  animator.to(navSearchItem[0], {
+  toggleClass(navSearchWrapper, 'has-item', false)
+  animator.killTweensOf(navSearchItem, 'opacity')
+  animator.to(navSearchItem, {
     duration: 0.2,
     opacity: 0,
     ease: 'none',
     onComplete() {
-      navSearchItem.hide()
+      hideElement(navSearchItem)
     },
   })
 }

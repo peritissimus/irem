@@ -26,6 +26,10 @@ export function hide(node) {
   node.style.display = 'none'
 }
 
+export function toggleClass(node, className, force) {
+  node.classList.toggle(className, force)
+}
+
 export function setHeight(node, height) {
   node.style.height = typeof height === 'number' ? `${height}px` : height
 }
