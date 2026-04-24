@@ -1,7 +1,7 @@
 import $ from 'jquery'
 import { config } from '../config.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let container
 let bg
@@ -79,30 +79,32 @@ function render() {
 // NOTE: param `duration` compared to undeclared `s` in original (always undefined),
 // so calling animateFading() with no arg yields duration=2; otherwise uses `duration`. Preserved.
 function animateFading(duration) {
-  EKTweener.to(fadeState, duration === undefined ? 2 : duration, {
+  animator.to(fadeState, {
+    duration: duration === undefined ? 2 : duration,
     fading: targetFading,
+    ease: 'circ.out',
     onUpdate: render,
   })
 }
 
 function show() {
-  EKTweener.fromTo(container, 0.5, { opacity: 0 }, { opacity: 1, ease: 'linear' })
   container.show()
+  animator.fromTo(container[0], { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
   animateFading()
 }
 
 function showBg() {
-  EKTweener.to(bg, 1.3, { transform3d: 'scale3d(1,1,1)' })
+  animator.to(bg[0], { duration: 1.3, scaleY: 1, ease: 'circ.out' })
 }
 
 function hideBg() {
-  EKTweener.to(bg, 1.3, { transform3d: 'scale3d(1,0,1)' })
+  animator.to(bg[0], { duration: 1.3, scaleY: 0, ease: 'circ.out' })
 }
 
 function updateFading(ratio) {
   const next = ratio * 100
   if (ratio * 100 !== config.settings.fading) {
-    EKTweener.killTweensOf(fadeState)
+    animator.killTweensOf(fadeState)
     fadeState.fading = next
     if (ctx) render()
   }
