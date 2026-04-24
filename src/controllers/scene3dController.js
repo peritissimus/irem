@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { deepMixIn, lerp, clamp } from '../utils/native.js'
 import { config } from '../config.js'
 import { stageReference } from '../stageReference.js'
@@ -13,6 +12,7 @@ import { ParticleField } from '../scene3d/ParticleField.js'
 import { searchPostParticles } from '../scene3d/searchPostParticles.js'
 import { navPostParticles } from '../scene3d/navPostParticles.js'
 import { fakeParticles } from '../scene3d/fakeParticles.js'
+import { qs } from '../utils/dom.js'
 // The postprocessing + shader imports are side-effects — they register onto THREE.
 import THREE from '../libs/threejs/Three.js'
 import '../postprocessing/EffectComposer.js'
@@ -164,8 +164,8 @@ function init() {
   scene3dController.cameraPosOffset = cameraPosOffset
   scene3dController.fixedScalePoint = fixedScalePoint
 
-  container = $('.base-3d-container')
-  containerStyle = container[0].style
+  container = qs('.base-3d-container')
+  containerStyle = container.style
 
   camera = new THREE.PerspectiveCamera(100, 1, 1, 3000)
   raycaster = new THREE.Raycaster()
