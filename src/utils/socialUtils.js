@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { trackEvent } from '../controllers/trackingController.js'
 
@@ -57,8 +56,14 @@ export function getPinterestShareLink(url, description, media) {
   )
 }
 
+function decodeHtml(rawHtml) {
+  const span = document.createElement('span')
+  span.innerHTML = rawHtml
+  return span.textContent
+}
+
 export function socialShare(type, path, rawMessage) {
-  const message = rawMessage ? $('<span>').html(rawMessage).text() : ''
+  const message = rawMessage ? decodeHtml(rawMessage) : ''
   const safePath = path || ''
   const shareUrl = config.SITE_URL + safePath
 

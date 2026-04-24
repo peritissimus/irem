@@ -1,5 +1,4 @@
 import { config } from '../config.js'
-import $ from 'jquery'
 
 const DEV_LOG_ENABLED = false
 
@@ -56,7 +55,7 @@ export function track(data) {
 }
 
 export function trackDom(element) {
-  track($(element).data())
+  track({ ...element.dataset })
 }
 
 export const trackingController = {
