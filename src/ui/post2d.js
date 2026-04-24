@@ -10,7 +10,7 @@ import { scene3dController } from '../controllers/scene3dController.js'
 import { trackPage } from '../controllers/trackingController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { socialShare } from '../utils/socialUtils.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 const CONTENT_WIDTH = 348
 
@@ -129,14 +129,16 @@ function show(post) {
         (parseInt(post.id, 10) + config.POST_ID_OFFSET),
     )
   }
-  EKTweener.fromTo(
-    centerWrapper,
-    1,
-    { opacity: 0 },
-    { opacity: 1, ease: 'linear' },
-  )
-  EKTweener.to(contentWrapper, 0, { width: 0 })
-  EKTweener.to(contentWrapper, 0.6, { delay: 0.4, width: CONTENT_WIDTH })
+  animator.killTweensOf(centerWrapper[0], 'opacity')
+  animator.fromTo(centerWrapper[0], { opacity: 0 }, { duration: 1, opacity: 1, ease: 'none' })
+  animator.killTweensOf(contentWrapper[0], 'width')
+  animator.set(contentWrapper[0], { width: 0 })
+  animator.to(contentWrapper[0], {
+    duration: 0.6,
+    delay: 0.4,
+    width: CONTENT_WIDTH,
+    ease: 'circ.out',
+  })
   contentWrapper[0].scrollpane.onResize()
 }
 
@@ -212,9 +214,11 @@ function hide() {
     history.replaceState(null, '', config.SITE_URL + '/')
   }
   onHidden.dispatch()
-  EKTweener.to(centerWrapper, 0.5, {
+  animator.killTweensOf(centerWrapper[0], 'opacity')
+  animator.to(centerWrapper[0], {
+    duration: 0.5,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       container.hide()
     },
