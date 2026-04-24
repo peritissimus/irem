@@ -6,7 +6,7 @@ import { tutorialController } from '../controllers/tutorialController.js'
 import { uiController } from '../controllers/uiController.js'
 import { stepController } from '../controllers/stepController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let container
 // NOTE: navIconWrapper is assigned in preInit but never read in original — preserved
@@ -158,24 +158,25 @@ function showSearchItem(text) {
   navSearchWrapper.addClass('has-item')
   navSearchItem.show()
   navSearchItemText.text(text)
-  EKTweener.fromTo(
-    navSearchItem,
-    0.2,
-    { opacity: 0 },
-    { opacity: 1, ease: 'linear' },
-  )
-  EKTweener.to(navSearchItemLine, 0, { width: 0 })
-  EKTweener.to(navSearchItemLine, 0.2, {
+  animator.killTweensOf(navSearchItem[0], 'opacity')
+  animator.fromTo(navSearchItem[0], { opacity: 0 }, { duration: 0.2, opacity: 1, ease: 'none' })
+  animator.killTweensOf(navSearchItemLine[0], 'width')
+  animator.set(navSearchItemLine[0], { width: 0 })
+  animator.to(navSearchItemLine[0], {
+    duration: 0.2,
     delay: 0.15,
     width: navSearchItem.width(),
+    ease: 'circ.out',
   })
 }
 
 function hideSearchItem() {
   navSearchWrapper.removeClass('has-item')
-  EKTweener.to(navSearchItem, 0.2, {
+  animator.killTweensOf(navSearchItem[0], 'opacity')
+  animator.to(navSearchItem[0], {
+    duration: 0.2,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       navSearchItem.hide()
     },
