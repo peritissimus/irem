@@ -14,6 +14,8 @@ function withCallback(url, callbackName) {
 }
 
 export function jsonp(url, { success, error } = {}) {
+  if (handleArchiveJsonp(url, success, error)) return
+
   const callbackName = makeCallbackName()
   const script = document.createElement('script')
 
@@ -33,4 +35,19 @@ export function jsonp(url, { success, error } = {}) {
   }
   script.src = withCallback(url, callbackName)
   document.head.append(script)
+}
+
+function handleArchiveJsonp(url, success, error) {
+  const archiveApi = window.__IREM_ARCHIVE_API__
+  if (!archiveApi) return false
+
+  const requestUrl = withCallback(url, makeCallbackName())
+  const payload = archiveApi({ url: requestUrl })
+  if (!payload) return false
+
+  setTimeout(() => {
+    if (payload.success) success?.(payload)
+    else error?.(payload)
+  }, 0)
+  return true
 }

@@ -100,6 +100,19 @@ export function installArchiveApiShim($) {
     }
   }
 
+  window.__IREM_ARCHIVE_API__ = (request) => {
+    const resolved = resolveArchiveRequest(request)
+    if (!resolved) return null
+    return buildArchiveResponse(
+      resolved,
+      request,
+      archivedPosts,
+      postIds,
+      tagIndex,
+      relatedTagIndex,
+    )
+  }
+
   $.ajax = function ajaxWithArchiveSupport(options) {
     const request =
       typeof options === 'string'
@@ -110,8 +123,8 @@ export function installArchiveApiShim($) {
       return originalAjax(options)
     }
 
-    const url = new URL(request.url, window.location.href)
-    if (!isArchiveApiRequest(url)) {
+    const url = resolveArchiveRequest(request)
+    if (!url) {
       return originalAjax(options)
     }
 
@@ -150,6 +163,12 @@ export function installArchiveApiShim($) {
     promise.abort = () => promise
     return promise
   }
+}
+
+function resolveArchiveRequest(request) {
+  if (!request?.url) return null
+  const url = new URL(request.url, window.location.href)
+  return isArchiveApiRequest(url) ? url : null
 }
 
 function isArchiveApiRequest(url) {
