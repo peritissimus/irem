@@ -12,7 +12,7 @@ import { uploadMethodsStep } from '../steps/uploadMethodsStep.js'
 import { adjustmentStep } from '../steps/adjustmentStep.js'
 import { messageStep } from '../steps/messageStep.js'
 import { congratsStep } from '../steps/congratsStep.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original AMD factory listed `signals` as a dep but body never used it.
 // Dropped. Also dropped the cached selector `b = $(".add-steps-indicators,
@@ -87,11 +87,12 @@ function goToStep(id) {
   if (step !== currentStep) {
     if (currentStep) currentStep.hide()
     indicators.removeClass('selected').eq(step.indicatorIndex).addClass('selected')
-    EKTweener.to(
-      stepCircle.uniforms.animationRatio,
-      step.animationDuration === undefined ? 1 : step.animationDuration,
-      { value: step.animationIndex, ease: 'easeOutSine' },
-    )
+    animator.killTweensOf(stepCircle.uniforms.animationRatio, 'value')
+    animator.to(stepCircle.uniforms.animationRatio, {
+      duration: step.animationDuration === undefined ? 1 : step.animationDuration,
+      value: step.animationIndex,
+      ease: 'sine.out',
+    })
     step.show()
     currentStep = step
   }
@@ -109,8 +110,10 @@ function show(id) {
   })
   if (!id) id = 'add-options'
   container.show()
-  EKTweener.to(stepCircle.uniforms.opacity, 0.5, { value: 1 })
-  EKTweener.fromTo(container, 0.5, { opacity: 0 }, { opacity: 1, ease: 'linear' })
+  animator.killTweensOf(stepCircle.uniforms.opacity, 'value')
+  animator.to(stepCircle.uniforms.opacity, { duration: 0.5, value: 1, ease: 'circ.out' })
+  animator.killTweensOf(container[0], 'opacity')
+  animator.fromTo(container[0], { opacity: 0 }, { duration: 0.5, opacity: 1, ease: 'none' })
   goToStep(id)
 }
 
@@ -125,14 +128,19 @@ function hide() {
   if (currentStep) currentStep.hide()
   indicators.removeClass('selected')
   currentStep = null
-  EKTweener.to(stepCircle.uniforms.opacity, 0.5, { value: 0 })
-  EKTweener.to(postSubmitCircle.uniforms.fade, 0.5, { value: 0 })
-  EKTweener.to(container, 0.5, {
+  animator.killTweensOf(stepCircle.uniforms.opacity, 'value')
+  animator.to(stepCircle.uniforms.opacity, { duration: 0.5, value: 0, ease: 'circ.out' })
+  animator.killTweensOf(postSubmitCircle.uniforms.fade, 'value')
+  animator.to(postSubmitCircle.uniforms.fade, { duration: 0.5, value: 0, ease: 'circ.out' })
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], {
+    duration: 0.5,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       container.hide()
-      EKTweener.to(stepCircle.uniforms.animationRatio, 0, { value: 0 })
+      animator.killTweensOf(stepCircle.uniforms.animationRatio, 'value')
+      animator.set(stepCircle.uniforms.animationRatio, { value: 0 })
     },
   })
   tutorialController.show()
@@ -142,13 +150,22 @@ function hide() {
 function showBackBtn(callback) {
   backCallback = callback
   backBtn.show()
-  EKTweener.to(backBtn, 0.5, { opacity: 1, transform3d: 'translate3d(0,0,0)' })
+  animator.killTweensOf(backBtn[0], 'opacity,x')
+  animator.to(backBtn[0], {
+    duration: 0.5,
+    opacity: 1,
+    x: 0,
+    ease: 'circ.out',
+  })
 }
 
 function hideBackBtn() {
-  EKTweener.to(backBtn, 0.5, {
+  animator.killTweensOf(backBtn[0], 'opacity,x')
+  animator.to(backBtn[0], {
+    duration: 0.5,
     opacity: 0,
-    transform3d: 'translate3d(-40px,0,0)',
+    x: -40,
+    ease: 'circ.out',
     onComplete() {
       backBtn.hide()
     },
@@ -166,16 +183,25 @@ function disableBackBtn() {
 function showValidateBtn(callback) {
   validateCallback = callback
   validateBtn.show()
-  EKTweener.to(validateBtn, 0.5, { opacity: 1, transform3d: 'translate3d(0,0,0)' })
+  animator.killTweensOf(validateBtn[0], 'opacity,x')
+  animator.to(validateBtn[0], {
+    duration: 0.5,
+    opacity: 1,
+    x: 0,
+    ease: 'circ.out',
+  })
 }
 
 // NOTE: original tweens opacity to 1 (not 0) on hide. Also slides to +40px.
 // Looks like a typo (the back button sets opacity:0 in its hide), but kept
 // verbatim — visual quirk in the archived bundle.
 function hideValidateBtn() {
-  EKTweener.to(validateBtn, 0.5, {
+  animator.killTweensOf(validateBtn[0], 'opacity,x')
+  animator.to(validateBtn[0], {
+    duration: 0.5,
     opacity: 1,
-    transform3d: 'translate3d(40px,0,0)',
+    x: 40,
+    ease: 'circ.out',
     onComplete() {
       validateBtn.hide()
     },
