@@ -50,7 +50,7 @@ function createMaterial() {
 }
 
 function createMesh() {
-  postSubmitCircle.geometry = new THREE.PlaneGeometry(SIZE, SIZE)
+  postSubmitCircle.geometry = new THREE.PlaneBufferGeometry(SIZE, SIZE)
   mesh = postSubmitCircle.mesh = new THREE.Mesh(postSubmitCircle.geometry, postSubmitCircle.material)
   position = mesh.position
 }

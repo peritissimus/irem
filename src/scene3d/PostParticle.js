@@ -46,7 +46,7 @@ export class PostParticle extends THREE.Mesh {
       showScale: { type: 'f', value: 1 },
     }
     super(
-      new THREE.PlaneGeometry(size, size, 1, 1),
+      new THREE.PlaneBufferGeometry(size, size, 1, 1),
       new THREE.ShaderMaterial({
         uniforms,
         attributes: {},
