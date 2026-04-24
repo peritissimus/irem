@@ -60,7 +60,7 @@ export class ParticleField {
         vertices.push(new THREE.Vector3(px, 0, z * spacing))
       }
     }
-    this.particles = new THREE.ParticleSystem(geometry, this.material)
+    this.particles = new THREE.PointCloud(geometry, this.material)
   }
 
   move(x, z) {

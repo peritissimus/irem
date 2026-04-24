@@ -31,7 +31,7 @@ function createMaterial() {
 
 function createGeometry() {
   map.geometry = new THREE.OctahedronGeometry(45, 5)
-  map.particles = new THREE.ParticleSystem(map.geometry, map.material)
+  map.particles = new THREE.PointCloud(map.geometry, map.material)
 }
 
 export const map = {

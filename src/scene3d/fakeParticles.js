@@ -37,7 +37,7 @@ function init(scene) {
   for (let i = 0; i < AMOUNT; i++) {
     geometry.vertices.push(new THREE.Vector3(i, 0, 0))
   }
-  fakeParticles.particles = new THREE.ParticleSystem(geometry, material)
+  fakeParticles.particles = new THREE.PointCloud(geometry, material)
   scene.add(fakeParticles.particles)
 }
 

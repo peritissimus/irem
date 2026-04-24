@@ -46,7 +46,7 @@ function createGeometry() {
     vertices.push(new THREE.Vector3(Math.sin(angle) * radius, Math.cos(angle) * radius, 0))
   }
 
-  stepCircle.particles = new THREE.ParticleSystem(geometry, stepCircle.material)
+  stepCircle.particles = new THREE.PointCloud(geometry, stepCircle.material)
 }
 
 function updateStepTimes() {
