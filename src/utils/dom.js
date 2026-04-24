@@ -18,7 +18,7 @@ export function remove(selectorOrNode, root = document) {
   for (const node of nodes) node.remove()
 }
 
-export function show(node, display = '') {
+export function show(node, display = 'block') {
   node.style.display = display
 }
 
