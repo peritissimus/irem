@@ -4,7 +4,7 @@ import { uiController } from '../controllers/uiController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { trackPage } from '../controllers/trackingController.js'
 import { stepCircle } from '../scene3d/stepCircle.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let container
 let textLines
@@ -19,13 +19,17 @@ function bindLoading() {
 }
 
 function onLoading(value) {
-  EKTweener.to(stepCircle.uniforms.fading, config.SKIP_PRELOADER ? 0 : 1, {
+  animator.killTweensOf(stepCircle.uniforms.fading, 'value')
+  animator.to(stepCircle.uniforms.fading, {
+    duration: config.SKIP_PRELOADER ? 0 : 1,
     value: 1,
-    ease: 'easeInSine',
+    ease: 'sine.in',
   })
-  EKTweener.to(stepCircle.uniforms.animationRatio, config.SKIP_PRELOADER ? 0 : 10, {
+  animator.killTweensOf(stepCircle.uniforms.animationRatio, 'value')
+  animator.to(stepCircle.uniforms.animationRatio, {
+    duration: config.SKIP_PRELOADER ? 0 : 10,
     value: 1,
-    ease: 'easeInSine',
+    ease: 'sine.in',
     onComplete() {
       if (value === 1) {
         completeCounter++
@@ -38,14 +42,18 @@ function onLoading(value) {
 function start() {
   trackPage({ trackPage: 'loader' })
   container.show()
-  EKTweener.to(textLines[0], config.SKIP_PRELOADER ? 0 : 2, {
+  animator.killTweensOf(textLines[0], 'opacity')
+  animator.to(textLines[0], {
+    duration: config.SKIP_PRELOADER ? 0 : 2,
     opacity: 0.5,
-    ease: 'linear',
+    ease: 'none',
   })
-  EKTweener.to(textLines[1], config.SKIP_PRELOADER ? 0 : 2, {
+  animator.killTweensOf(textLines[1], 'opacity')
+  animator.to(textLines[1], {
+    duration: config.SKIP_PRELOADER ? 0 : 2,
     delay: config.SKIP_PRELOADER ? 0 : 2,
     opacity: 0.5,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       setTimeout(fadeOutFirstPair, config.SKIP_PRELOADER ? 0 : 2500)
     },
@@ -53,23 +61,31 @@ function start() {
 }
 
 function fadeOutFirstPair() {
-  EKTweener.to(textLines[0], config.SKIP_PRELOADER ? 0 : 1, {
+  animator.killTweensOf(textLines[0], 'opacity')
+  animator.to(textLines[0], {
+    duration: config.SKIP_PRELOADER ? 0 : 1,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
   })
-  EKTweener.to(textLines[1], config.SKIP_PRELOADER ? 0 : 1, {
+  animator.killTweensOf(textLines[1], 'opacity')
+  animator.to(textLines[1], {
+    duration: config.SKIP_PRELOADER ? 0 : 1,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       textLines[0].style.display = textLines[1].style.display = 'none'
-      EKTweener.to(textLines[2], config.SKIP_PRELOADER ? 0 : 2, {
+      animator.killTweensOf(textLines[2], 'opacity')
+      animator.to(textLines[2], {
+        duration: config.SKIP_PRELOADER ? 0 : 2,
         opacity: 0.5,
-        ease: 'linear',
+        ease: 'none',
       })
-      EKTweener.to(textLines[3], config.SKIP_PRELOADER ? 0 : 2, {
+      animator.killTweensOf(textLines[3], 'opacity')
+      animator.to(textLines[3], {
+        duration: config.SKIP_PRELOADER ? 0 : 2,
         delay: config.SKIP_PRELOADER ? 0 : 2,
         opacity: 0.5,
-        ease: 'linear',
+        ease: 'none',
         onComplete() {
           setTimeout(
             () => {
@@ -86,13 +102,17 @@ function fadeOutFirstPair() {
 
 function finalize() {
   if (completeCounter !== 2) return
-  EKTweener.to(textLines[2], config.SKIP_PRELOADER ? 0 : 1, {
+  animator.killTweensOf(textLines[2], 'opacity')
+  animator.to(textLines[2], {
+    duration: config.SKIP_PRELOADER ? 0 : 1,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
   })
-  EKTweener.to(textLines[3], config.SKIP_PRELOADER ? 0 : 1, {
+  animator.killTweensOf(textLines[3], 'opacity')
+  animator.to(textLines[3], {
+    duration: config.SKIP_PRELOADER ? 0 : 1,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       uiController._appInitFunc()
       container.hide()
