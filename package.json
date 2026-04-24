@@ -1,0 +1,28 @@
+{
+  "name": "irem-esm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "verify:esm-graph": "node scripts/verify-esm-graph.mjs"
+  },
+  "dependencies": {
+    "@tweenjs/tween.js": "^25.0.0",
+    "jquery": "1.11.1",
+    "mout": "1.2.4",
+    "signals": "1.0.0",
+    "three": "^0.71.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "acorn": "^8.16.0",
+    "acorn-walk": "^8.3.5",
+    "eslint": "^10.2.1",
+    "globals": "^17.5.0",
+    "vite": "^8.0.10"
+  }
+}

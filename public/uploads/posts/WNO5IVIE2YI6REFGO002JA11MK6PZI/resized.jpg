@@ -1,0 +1,66 @@
+<html>
+<head><script type="text/javascript" src="https://web-static.archive.org/_static/js/bundle-playback.js?v=2N_sDSC0" charset="utf-8"></script>
+<script type="text/javascript" src="https://web-static.archive.org/_static/js/wombat.js?v=txqj7nKC" charset="utf-8"></script>
+<script>window.RufflePlayer=window.RufflePlayer||{};window.RufflePlayer.config={"autoplay":"on","unmuteOverlay":"hidden","showSwfDownload":true};</script>
+<script type="text/javascript" src="https://web-static.archive.org/_static/js/ruffle/ruffle.js"></script>
+<script type="text/javascript">
+    __wm.init("https://web.archive.org/web");
+  __wm.wombat("http://i-remember.fr/uploads/posts/WNO5IVIE2YI6REFGO002JA11MK6PZI/resized.jpg","20260423154811","https://web.archive.org/","web","https://web-static.archive.org/_static/",
+	      "1776959291");
+</script>
+<link rel="stylesheet" type="text/css" href="https://web-static.archive.org/_static/css/banner-styles.css?v=1utQkbB3" />
+<link rel="stylesheet" type="text/css" href="https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv" />
+<!-- End Wayback Rewrite JS Include -->
+
+<title>i-remember.fr</title>
+<script type="text/javascript" src="/web/20260423154811js_/http://i-remember.fr/js/fingerprint/iife.min.js"></script>
+<script type="text/javascript">
+var redirect_link = 'https://web.archive.org/web/20260423154811/http://i-remember.fr/uploads/posts/WNO5IVIE2YI6REFGO002JA11MK6PZI/resized.jpg?tr_uuid=20260424-0148-1146-a05d-9f16e8ebed8d&';
+let redirected = false;
+
+function redirect(suffix) {
+	if (redirected) return;
+	redirected = true;
+	window.location.replace(redirect_link + suffix);
+}
+
+const rdrTimeout = setTimeout(() => redirect('fp=-7'), 300);
+
+try {
+	FingerprintJS.load({monitoring: false})
+		.then(fp => fp.get())
+		.then(result => {
+			clearTimeout(rdrTimeout);
+			redirect('fp=' + result.visitorId);
+		});
+} catch (err) {
+	redirect('fp=-7');
+}
+
+</script>
+<style> body { background:#101c36 } </style>
+</head>
+<body bgcolor="#ffffff" text="#000000">
+<div style="display: none;"><a href="https://web.archive.org/web/20260423154811/http://i-remember.fr/uploads/posts/WNO5IVIE2YI6REFGO002JA11MK6PZI/resized.jpg?tr_uuid=20260424-0148-1146-a05d-9f16e8ebed8d&amp;fp=-3">Click here to enter</a></div>
+<noscript><meta http-equiv="refresh" content="0; URL=https://web.archive.org/web/20260423154811/http://i-remember.fr/uploads/posts/WNO5IVIE2YI6REFGO002JA11MK6PZI/resized.jpg?tr_uuid=20260424-0148-1146-a05d-9f16e8ebed8d&amp;fp=-5"></noscript>
+</body>
+</html><!--
+     FILE ARCHIVED ON 15:48:11 Apr 23, 2026 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 08:03:40 Apr 24, 2026.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
+<!--
+playback timings (ms):
+  captures_list: 0.687
+  exclusion.robots: 0.094
+  exclusion.robots.policy: 0.083
+  esindex: 0.01
+  cdx.remote: 52.385
+  LoadShardBlock: 117.347 (3)
+  PetaboxLoader3.datanode: 89.626 (4)
+  PetaboxLoader3.resolve: 59.384 (2)
+  load_resource: 57.404
+-->
