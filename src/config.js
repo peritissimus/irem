@@ -7,7 +7,7 @@ export function initConfig() {
   config.appContainer = qs('.app')
   config.LANG = window.LANG
   config.ENV_ID = window.ENV_ID
-  config.IS_DEV = window.IS_DEV
+  config.IS_DEV = import.meta.env.DEV || window.IS_DEV
   config.LANG_LONG = { fr: 'French', en: 'English' }[config.LANG]
 
   config.POST_ID_OFFSET = 1248
