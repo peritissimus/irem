@@ -6,6 +6,10 @@ export function qsa(selector, root = document) {
   return Array.from(root.querySelectorAll(selector))
 }
 
+export function withDescendants(node) {
+  return [node, ...node.querySelectorAll('*')]
+}
+
 export function remove(selectorOrNode, root = document) {
   const nodes =
     typeof selectorOrNode === 'string'
@@ -16,6 +20,10 @@ export function remove(selectorOrNode, root = document) {
 
 export function show(node, display = '') {
   node.style.display = display
+}
+
+export function hide(node) {
+  node.style.display = 'none'
 }
 
 export function setHeight(node, height) {
