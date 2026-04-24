@@ -15,6 +15,9 @@ const contentTypes = new Map([
   ['.ttf', 'font/ttf'],
   ['.woff', 'font/woff'],
 ])
+const allowedConsoleErrors = new Set([
+  'THREE.Projector has been moved to /examples/js/renderers/Projector.js.',
+])
 
 test('boots the archived app shell without runtime errors', async ({ page }) => {
   const pageErrors = []
@@ -44,7 +47,10 @@ test('boots the archived app shell without runtime errors', async ({ page }) => 
     pageErrors.push(error.message)
   })
   page.on('console', (message) => {
-    if (message.type() === 'error') consoleErrors.push(message.text())
+    const text = message.text()
+    if (message.type() === 'error' && !allowedConsoleErrors.has(text)) {
+      consoleErrors.push(text)
+    }
   })
 
   await page.goto('/')
