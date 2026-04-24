@@ -9,7 +9,7 @@ import { config } from '../config.js'
 import { stepController } from '../controllers/stepController.js'
 import { inputController } from '../controllers/inputController.js'
 import { postSubmitCircle } from '../scene3d/postSubmitCircle.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 import { stageReference } from '../stageReference.js'
 
 const PI = Math.PI
@@ -105,7 +105,8 @@ function computeLayout() {
 function show() {
   renderedX = renderedY = targetX = targetY = 0
   _isReady = false
-  EKTweener.to(container, 0, { opacity: 1 })
+  animator.killTweensOf(container[0], 'opacity')
+  animator.set(container[0], { opacity: 1 })
   computeLayout()
   canvas.style.display = 'block'
   container.show()
@@ -115,9 +116,11 @@ function show() {
 
 function hide() {
   _isReady = false
-  EKTweener.to(container, 0.5, {
+  animator.killTweensOf(container[0], 'opacity')
+  animator.to(container[0], {
+    duration: 0.5,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
     onComplete() {
       container.hide()
       stageReference.onRender.remove(render)
@@ -131,13 +134,14 @@ function startTutorialIntro() {
   if (tutorialPlayed === undefined) {
     tutorialPlayed = config.SKIP_ADJUSTMENT_TUTORIALS
   }
-  EKTweener.fromTo(
+  animator.killTweensOf(tweenState, 'animation')
+  animator.fromTo(
     tweenState,
-    tutorialPlayed ? 0 : 3.5,
     { animation: 0 },
     {
+      duration: tutorialPlayed ? 0 : 3.5,
       animation: 1,
-      ease: 'linear',
+      ease: 'none',
       onComplete() {
         stepController.enableBackBtn()
         stepController.enableValidateBtn()
@@ -145,7 +149,8 @@ function startTutorialIntro() {
         stepController.showValidateBtn(onValidateBtn)
         tutorialPlayed = true
         _isReady = true
-        EKTweener.to(tweenState, 0.5, { animation: 2, ease: 'linear' })
+        animator.killTweensOf(tweenState, 'animation')
+        animator.to(tweenState, { duration: 0.5, animation: 2, ease: 'none' })
       },
     },
   )
@@ -173,12 +178,13 @@ function onValidateBtn() {
   )
   submitCtx.restore()
   postSubmitCircle.uniforms.texture.value.needsUpdate = true
-  EKTweener.to(postSubmitCircle.uniforms.fade, 0, { value: 1 })
-  EKTweener.fromTo(
+  animator.killTweensOf(postSubmitCircle.uniforms.fade, 'value')
+  animator.set(postSubmitCircle.uniforms.fade, { value: 1 })
+  animator.killTweensOf(postSubmitCircle.uniforms.animation, 'value')
+  animator.fromTo(
     postSubmitCircle.uniforms.animation,
-    0.35,
     { value: 0 },
-    { value: 1, ease: 'linear' },
+    { duration: 0.35, value: 1, ease: 'none' },
   )
   canvas.style.display = 'none'
   stepController.goToStep('message')
