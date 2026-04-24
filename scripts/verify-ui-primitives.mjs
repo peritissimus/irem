@@ -8,7 +8,6 @@ import { Parser } from 'acorn'
 const files = [
   'src/ui/com/CircleBtn.js',
   'src/widgets/SimpleScrollPane.js',
-  'src/ektweener.js',
 ]
 
 const checks = []

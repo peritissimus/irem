@@ -17,7 +17,6 @@ const expectedExports = new Map(
   Object.entries({
     'src/config.js': ['config', 'initConfig'],
     'src/stageReference.js': ['stageReference'],
-    'src/ektweener.js': ['EKTweener'],
     'src/controllers/inputController.js': ['inputController'],
     'src/controllers/postController.js': ['postController'],
     'src/controllers/preloaderController.js': ['preloaderController'],
