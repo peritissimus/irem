@@ -1,7 +1,7 @@
 import $ from 'jquery'
 import { stepCircle } from '../scene3d/stepCircle.js'
 import { stepController } from '../controllers/stepController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original AMD factory also captured `t.transform3DStyle` as a
 // module-load local — never used in body. Dropped along with the lazy-config
@@ -31,19 +31,28 @@ function bindEvents() {
 }
 
 function onShareOver() {
-  EKTweener.to(stepCircle.uniforms.focusRatio, 0.8, {
+  animator.killTweensOf(stepCircle.uniforms.focusRatio, 'value')
+  animator.to(stepCircle.uniforms.focusRatio, {
+    duration: 0.8,
     value: 1,
-    ease: 'easeOutSine',
+    ease: 'sine.out',
   })
-  EKTweener.to(stepCircle.uniforms.stepExtraTimes.value, 0.8, {
+  animator.killTweensOf(stepCircle.uniforms.stepExtraTimes.value, 'x')
+  animator.to(stepCircle.uniforms.stepExtraTimes.value, {
+    duration: 0.8,
     x: stepCircle.uniforms.stepExtraTimes.value.x + 5,
-    ease: 'easeOutSine',
+    ease: 'sine.out',
   })
 }
 
 function onShareOut() {
   if (!isAdvancing) {
-    EKTweener.to(stepCircle.uniforms.focusRatio, 0.8, { value: 0 })
+    animator.killTweensOf(stepCircle.uniforms.focusRatio, 'value')
+    animator.to(stepCircle.uniforms.focusRatio, {
+      duration: 0.8,
+      value: 0,
+      ease: 'circ.out',
+    })
   }
 }
 
