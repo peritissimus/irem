@@ -35,17 +35,20 @@ function createMaterial() {
 }
 
 function createGeometry() {
-  const geometry = (stepCircle.geometry = new THREE.Geometry())
-  const vertices = geometry.vertices
+  const geometry = (stepCircle.geometry = new THREE.BufferGeometry())
   const amountPerDegree = config.STEP_CIRCLE_PARTICLE_AMOUNT_PER_DEGREE
   const amount = amountPerDegree * 360
+  const positions = new Float32Array(amount * 3)
 
   for (let i = 0; i < amount; i++) {
     const angle = (i / 180) * Math.PI
     const radius = 1 + ~~((i / amount) * amountPerDegree) / amountPerDegree
-    vertices.push(new THREE.Vector3(Math.sin(angle) * radius, Math.cos(angle) * radius, 0))
+    positions[i * 3] = Math.sin(angle) * radius
+    positions[i * 3 + 1] = Math.cos(angle) * radius
+    positions[i * 3 + 2] = 0
   }
 
+  geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
   stepCircle.particles = new THREE.PointCloud(geometry, stepCircle.material)
 }
 
