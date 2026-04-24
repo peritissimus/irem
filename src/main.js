@@ -96,7 +96,7 @@ function boot({
 
     setTimeout(() => {
       uiController.preInit()
-      config.appContainer.addClass('show')
+      config.appContainer.classList.add('show')
       preloaderController.add(config.uiAssetPath)
       uiController._appInitFunc = () => appInit({
         uiController,

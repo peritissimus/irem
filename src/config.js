@@ -1,10 +1,10 @@
-import $ from 'jquery'
 import { rtrim } from './utils/native.js'
+import { qs } from './utils/dom.js'
 
 export const config = {}
 
 export function initConfig() {
-  config.appContainer = $('.app')
+  config.appContainer = qs('.app')
   config.LANG = window.LANG
   config.ENV_ID = window.ENV_ID
   config.IS_DEV = window.IS_DEV
@@ -12,7 +12,7 @@ export function initConfig() {
 
   config.POST_ID_OFFSET = 1248
 
-  config.BASE_URL = rtrim($('base').attr('href'), ['/'])
+  config.BASE_URL = rtrim(qs('base').getAttribute('href'), ['/'])
   config.SITE_URL = config.BASE_URL + (config.LANG === 'fr' ? '' : `/${config.LANG}`)
 
   config.settings = window.SETTINGS

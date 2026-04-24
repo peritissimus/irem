@@ -119,7 +119,7 @@ function onScrollUpdate(_event, pos) {
 }
 
 function onIconOver(circleBtn) {
-  if (!iconLocked) setSelectionType(circleBtn.target.data('id'))
+  if (!iconLocked) setSelectionType(circleBtn.el.dataset.id)
 }
 
 function onIconOut() {
@@ -127,7 +127,7 @@ function onIconOut() {
 }
 
 function onIconClick(circleBtn) {
-  const type = circleBtn.target.data('id')
+  const type = circleBtn.el.dataset.id
   if (type === 'facebook') {
     uiController.lock('facebook-load')
     facebook.retrieveImages({ type: 'albums' })

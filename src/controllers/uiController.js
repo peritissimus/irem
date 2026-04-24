@@ -1,4 +1,3 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { CircleBtn } from '../ui/com/CircleBtn.js'
 import { preloader } from '../ui/preloader.js'
@@ -12,14 +11,15 @@ import { errorBlocker } from '../ui/errorBlocker.js'
 import { post2d } from '../ui/post2d.js'
 import { scene3dController } from './scene3dController.js'
 import { stageReference } from '../stageReference.js'
+import { hide as hideElement, qs, qsa, show as showElement } from '../utils/dom.js'
 
 let mouseBlocker
 let lockToken
 
 function preInit() {
-  mouseBlocker = $('.mouse-blocker')
-  config.appContainer.find('.circle-btn').each(function () {
-    new CircleBtn({ target: $(this) })
+  mouseBlocker = qs('.mouse-blocker')
+  qsa('.circle-btn', config.appContainer).forEach((target) => {
+    new CircleBtn({ target })
   })
   preloader.init()
   header.preInit()
@@ -118,7 +118,7 @@ function lock(token) {
   if (!token) token = +new Date() + Math.random()
   lockToken = token
   uiController.isLocked = true
-  mouseBlocker.show()
+  showElement(mouseBlocker)
   return token
 }
 
@@ -126,7 +126,7 @@ function unlock(token) {
   if (token === lockToken) {
     uiController.isLocked = false
     lockToken = undefined
-    mouseBlocker.hide()
+    hideElement(mouseBlocker)
   }
 }
 
