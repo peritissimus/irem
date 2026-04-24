@@ -7,7 +7,7 @@ import { onHidden as post2dHidden } from '../ui/post2d.js'
 import lerp from 'mout/math/lerp'
 import clamp from 'mout/math/clamp'
 import THREE from '../libs/threejs/Three.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 const particles = []
 
@@ -86,13 +86,15 @@ function show(posts) {
       particle.scaleFixScaleRatio * post.img_offset_y * (post.resized_img_height - 128 / imageScale) / 2
     const duration = 4 + Math.random() * durationRange
     const delay = Math.random() * delayRange
-    EKTweener.killTweensOf(particle)
-    EKTweener.to(particle, duration, { fadeValue: 1, delay, ease: 'easeOutCirc' })
-    EKTweener.to(particle.uniforms.showScale, 0, { value: 0 })
-    EKTweener.to(particle.uniforms.showScale, duration, {
+    animator.killTweensOf(particle)
+    animator.to(particle, { duration, fadeValue: 1, delay, ease: 'circ.out' })
+    animator.killTweensOf(particle.uniforms.showScale)
+    animator.set(particle.uniforms.showScale, { value: 0 })
+    animator.to(particle.uniforms.showScale, {
+      duration,
       value: 1,
       delay,
-      ease: 'easeOutSine',
+      ease: 'sine.out',
     })
     if (duration > longestDuration) longestDuration = duration
   }
@@ -101,10 +103,11 @@ function show(posts) {
   fakeParticles.uniforms.posOffset.value.x = lookAtTarget.x
   fakeParticles.uniforms.posOffset.value.z = lookAtTarget.z
   fakeParticles.uniforms.cameraVector.value.copy(cameraVector.multiplyScalar(cameraDistance))
-  EKTweener.killTweensOf(fakeParticles)
-  EKTweener.to(fakeParticles, (longestDuration > 6 ? 6 : longestDuration) / 6 * 8, {
+  animator.killTweensOf(fakeParticles)
+  animator.to(fakeParticles, {
+    duration: (longestDuration > 6 ? 6 : longestDuration) / 6 * 8,
     time: 1,
-    ease: 'easeOutSine',
+    ease: 'sine.out',
   })
 }
 
@@ -231,32 +234,34 @@ function hide() {
     if (particle.visible) {
       const duration = 1 + Math.random() * durationRange
       const delay = Math.random() * delayRange
-      EKTweener.killTweensOf(particle)
-      EKTweener.to(particle, duration, {
+      animator.killTweensOf(particle)
+      animator.to(particle, {
+        duration,
         fadeValue: 0,
         delay,
-        ease: 'easeInCirc',
-        onComplete: hideParticle,
+        ease: 'circ.in',
+        onComplete() {
+          particle.visible = false
+        },
       })
-      EKTweener.to(particle.uniforms.showScale, duration, {
+      animator.killTweensOf(particle.uniforms.showScale)
+      animator.to(particle.uniforms.showScale, {
+        duration,
         value: 0,
         delay,
-        ease: 'easeInSine',
+        ease: 'sine.in',
       })
       longest = Math.max(duration + delay, longest)
     }
   }
 
-  EKTweener.killTweensOf(fakeParticles)
-  EKTweener.to(fakeParticles, (longest > 6 ? 6 : longest) / 6 * 10, {
+  animator.killTweensOf(fakeParticles)
+  animator.to(fakeParticles, {
+    duration: (longest > 6 ? 6 : longest) / 6 * 10,
     time: 0,
-    ease: 'easeInSine',
+    ease: 'sine.in',
     onComplete: finishHide,
   })
-}
-
-function hideParticle() {
-  this._appliedTarget.visible = false
 }
 
 function finishHide() {
