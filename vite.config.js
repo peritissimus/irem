@@ -8,6 +8,18 @@ export default defineConfig({
         index: resolve(__dirname, 'index.html'),
         en: resolve(__dirname, 'en.html'),
       },
+      output: {
+        manualChunks(id) {
+          if (!id.includes('/node_modules/')) return undefined
+          if (id.includes('/node_modules/three/')) return 'vendor-three'
+          if (id.includes('/node_modules/gsap/')) return 'vendor-gsap'
+          if (id.includes('/node_modules/jquery/')) return 'vendor-jquery'
+          if (id.includes('/node_modules/@tweenjs/tween.js/')) return 'vendor-tween'
+          if (id.includes('/node_modules/signals/')) return 'vendor-signals'
+          if (id.includes('/node_modules/mout/')) return 'vendor-mout'
+          return 'vendor'
+        },
+      },
     },
   },
 })
