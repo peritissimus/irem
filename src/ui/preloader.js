@@ -1,17 +1,17 @@
-import $ from 'jquery'
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { trackPage } from '../controllers/trackingController.js'
 import { stepCircle } from '../scene3d/stepCircle.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs, qsa, show as showElement } from '../utils/dom.js'
 
 let container
 let textLines
 let completeCounter = 0
 
 function preInit() {
-  textLines = $('.preloader-text-line')
+  textLines = qsa('.preloader-text-line')
 }
 
 function bindLoading() {
@@ -41,7 +41,7 @@ function onLoading(value) {
 
 function start() {
   trackPage({ trackPage: 'loader' })
-  container.show()
+  showElement(container)
   animator.killTweensOf(textLines[0], 'opacity')
   animator.to(textLines[0], {
     duration: config.SKIP_PRELOADER ? 0 : 2,
@@ -115,13 +115,13 @@ function finalize() {
     ease: 'none',
     onComplete() {
       uiController._appInitFunc()
-      container.hide()
+      hideElement(container)
     },
   })
 }
 
 function init() {
-  container = $('.preloader')
+  container = qs('.preloader')
   preInit()
   bindLoading()
   start()

@@ -1,8 +1,8 @@
-import $ from 'jquery'
 import signals from '../../events/signal.js'
 import { config } from '../../config.js'
 import { inputController } from '../../controllers/inputController.js'
 import { animator } from '../../animation/animator.js'
+import { qs } from '../../utils/dom.js'
 
 function clampedNorm(value, min, max) {
   const normalized = (value - min) / (max - min)
@@ -27,31 +27,33 @@ export class CircleBtn {
   }
 
   _init() {
-    const el = this.target
-    el[0].circleBtn = this
+    const target = this.target
+    const el = target?.jquery ? target[0] : target
+    this.el = el
+    el.circleBtn = this
 
-    this.size = el.data('size') || 44
-    this.strokeWidth = el.data('strokeWidth') || 2
-    this.strokeWidthOffset = el.data('strokeWidthOffset') || 1
+    this.size = Number(el.dataset.size) || 44
+    this.strokeWidth = Number(el.dataset.strokeWidth) || 2
+    this.strokeWidthOffset = Number(el.dataset.strokeWidthOffset) || 1
     this.innerSize = this.size - (this.strokeWidth + this.strokeWidthOffset) * 2
 
-    this.iconWrapper = el.find('.circle-btn-icon-wrapper')
-    this.iconWrapper.css({ width: this.innerSize, height: this.innerSize })
+    this.iconWrapper = qs('.circle-btn-icon-wrapper', el)
+    this.iconWrapper.style.width = `${this.innerSize}px`
+    this.iconWrapper.style.height = `${this.innerSize}px`
 
-    this.outline = $('<canvas class="circle-btn-outline"></canvas>')[0]
-    $(this.outline).css({
-      left: -this.strokeWidth - this.strokeWidthOffset,
-      top: -this.strokeWidth - this.strokeWidthOffset,
-    })
+    this.outline = document.createElement('canvas')
+    this.outline.className = 'circle-btn-outline'
+    this.outline.style.left = `${-this.strokeWidth - this.strokeWidthOffset}px`
+    this.outline.style.top = `${-this.strokeWidth - this.strokeWidthOffset}px`
     this.outline.width = this.outline.height = this.size
     this.outlineCtx = this.outline.getContext('2d')
     this.iconWrapper.prepend(this.outline)
 
-    this.iconStyle = this.iconWrapper.find('.circle-btn-icon')[0].style
+    this.iconStyle = qs('.circle-btn-icon', this.iconWrapper).style
     this.transform3DStyle = config.transform3DStyle
 
-    this.isDimmed = el.hasClass('circle-btn-style-dim')
-    this.isDisable = el.hasClass('circle-btn-state-disable')
+    this.isDimmed = el.classList.contains('circle-btn-style-dim')
+    this.isDisable = el.classList.contains('circle-btn-state-disable')
     this.isActive = true
     this.hoverAnimation = 0
 
@@ -60,9 +62,9 @@ export class CircleBtn {
     this.onClicked = new signals.Signal()
 
     this.boundRender = this.render.bind(this)
-    inputController.add(el, 'over', this._onOver.bind(this))
-    inputController.add(el, 'out', this._onOut.bind(this))
-    inputController.add(el, 'click', this._onClick.bind(this))
+    inputController.add(this.el, 'over', this._onOver.bind(this))
+    inputController.add(this.el, 'out', this._onOut.bind(this))
+    inputController.add(this.el, 'click', this._onClick.bind(this))
 
     this.render()
   }
@@ -70,7 +72,7 @@ export class CircleBtn {
   _onOver() {
     if (this.isDisable || !this.isActive) return
 
-    this.target.addClass('hover')
+    this.el.classList.add('hover')
     this.isHover = true
 
     if (!this.isDimmed) {
@@ -87,7 +89,7 @@ export class CircleBtn {
   }
 
   _onOut() {
-    this.target.removeClass('hover')
+    this.el.classList.remove('hover')
     this.isHover = false
 
     if (!this.isDimmed) {
@@ -110,12 +112,12 @@ export class CircleBtn {
 
   enable() {
     this.isDisable = false
-    this.target.removeClass('circle-btn-state-disable')
+    this.el.classList.remove('circle-btn-state-disable')
   }
 
   disable() {
     this.isDisable = true
-    this.target.addClass('circle-btn-state-disable')
+    this.el.classList.add('circle-btn-state-disable')
     this._onOut()
   }
 
