@@ -1,4 +1,3 @@
-import $ from 'jquery'
 // NOTE: `lerp` was declared as an AMD dep but never invoked in the original —
 // preserved in the named import list to match the legacy import surface.
 // eslint-disable-next-line no-unused-vars
@@ -12,6 +11,7 @@ import { inputController } from '../controllers/inputController.js'
 import { postSubmitCircle } from '../scene3d/postSubmitCircle.js'
 import { animator } from '../animation/animator.js'
 import { stageReference } from '../stageReference.js'
+import { hide as hideElement, qs, show as showElement } from '../utils/dom.js'
 
 const PI = Math.PI
 const CANVAS_SIZE = 290
@@ -48,7 +48,7 @@ const tweenState = { animation: 0 }
 let tutorialPlayed
 
 function init() {
-  container = $('.add-steps-adjustment')
+  container = qs('.add-steps-adjustment')
   initCanvas()
   initEvents()
 }
@@ -106,24 +106,24 @@ function computeLayout() {
 function show() {
   renderedX = renderedY = targetX = targetY = 0
   _isReady = false
-  animator.killTweensOf(container[0], 'opacity')
-  animator.set(container[0], { opacity: 1 })
+  animator.killTweensOf(container, 'opacity')
+  animator.set(container, { opacity: 1 })
   computeLayout()
   canvas.style.display = 'block'
-  container.show()
+  showElement(container)
   startTutorialIntro()
   stageReference.onRender.add(render)
 }
 
 function hide() {
   _isReady = false
-  animator.killTweensOf(container[0], 'opacity')
-  animator.to(container[0], {
+  animator.killTweensOf(container, 'opacity')
+  animator.to(container, {
     duration: 0.5,
     opacity: 0,
     ease: 'none',
     onComplete() {
-      container.hide()
+      hideElement(container)
       stageReference.onRender.remove(render)
     },
   })
