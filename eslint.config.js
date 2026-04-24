@@ -16,6 +16,7 @@ export default [
       'scripts/**/*.js',
       'scripts/**/*.mjs',
       'src/**/*.js',
+      'tests/**/*.js',
       'vite.config.js',
     ],
     languageOptions: {

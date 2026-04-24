@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:smoke": "pnpm build && playwright test",
     "verify": "pnpm lint && pnpm verify:esm-graph && pnpm verify:html && pnpm build",
     "verify:esm-graph": "node scripts/verify-esm-graph.mjs",
     "verify:html": "node scripts/verify-html-entrypoints.mjs"
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.59.1",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "eslint": "^10.2.1",
