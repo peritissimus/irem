@@ -13,19 +13,16 @@ import { searchPostParticles } from '../scene3d/searchPostParticles.js'
 import { navPostParticles } from '../scene3d/navPostParticles.js'
 import { fakeParticles } from '../scene3d/fakeParticles.js'
 import { qs } from '../utils/dom.js'
-// The postprocessing + shader imports are side-effects — they register onto THREE.
 import THREE from '../libs/threejs/Three.js'
-import '../postprocessing/EffectComposer.js'
-import '../postprocessing/SavePass.js'
-import '../postprocessing/MaskPass.js'
-import '../postprocessing/RenderPass.js'
-import '../postprocessing/ShaderPass.js'
-import '../postprocessing/shaders/CopyShader.js'
-import '../postprocessing/shaders/BlendShader.js'
-import '../postprocessing/shaders/HorizontalTiltShiftShader.js'
-import '../postprocessing/shaders/RGBShiftShader.js'
-import '../postprocessing/shaders/VerticalTiltShiftShader.js'
-import '../postprocessing/shaders/CustomShader.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+import { SavePass } from 'three/examples/jsm/postprocessing/SavePass.js'
+import { RGBShiftShader } from 'three/examples/jsm/shaders/RGBShiftShader.js'
+import { HorizontalTiltShiftShader } from 'three/examples/jsm/shaders/HorizontalTiltShiftShader.js'
+import { VerticalTiltShiftShader } from 'three/examples/jsm/shaders/VerticalTiltShiftShader.js'
+import { BlendShader } from '../postprocessing/shaders/BlendShader.js'
+import { CustomShader } from '../postprocessing/shaders/CustomShader.js'
 
 // NOTE: callers of moveTo/resetCamera pass ease strings using EKTweener's
 // naming convention (e.g. 'easeInOutSine', 'easeOutSine', 'linear'). Map them
@@ -205,15 +202,15 @@ function init() {
   renderer.setClearColor(0x070707, 1)
   renderer.autoClear = false
 
-  composer = new THREE.EffectComposer(renderer)
-  renderPass = new THREE.RenderPass(particlesScene, camera)
-  rgbShiftPass = scene3dController.rgbShift = new THREE.ShaderPass(THREE.RGBShiftShader)
-  savePass = new THREE.SavePass()
-  hblurPass = scene3dController.hblur = new THREE.ShaderPass(THREE.HorizontalTiltShiftShader)
-  vblurPass = scene3dController.vblur = new THREE.ShaderPass(THREE.VerticalTiltShiftShader)
-  blurBlendPass = scene3dController.blurBlend = new THREE.ShaderPass(THREE.BlendShader)
-  blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget
-  customShaderPass = scene3dController.customShader = new THREE.ShaderPass(THREE.CustomShader)
+  composer = new EffectComposer(renderer)
+  renderPass = new RenderPass(particlesScene, camera)
+  rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
+  savePass = new SavePass()
+  hblurPass = scene3dController.hblur = new ShaderPass(HorizontalTiltShiftShader)
+  vblurPass = scene3dController.vblur = new ShaderPass(VerticalTiltShiftShader)
+  blurBlendPass = scene3dController.blurBlend = new ShaderPass(BlendShader)
+  blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget.texture
+  customShaderPass = scene3dController.customShader = new ShaderPass(CustomShader)
   customShaderPass.noiseSpeed = 0
 
   composer.addPass(renderPass)
@@ -364,7 +361,7 @@ function onResize() {
   if (composer) {
     composer.setSize(windowWidth, windowHeight)
     savePass.renderTarget = composer.renderTarget1.clone()
-    blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget
+    blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget.texture
   }
 }
 
@@ -559,10 +556,7 @@ function render() {
     vblurPass.uniforms.r.value =
     blurBlendPass.uniforms.r.value =
       0.5
-  hblurPass.uniforms.blendRatio.value =
-    vblurPass.uniforms.blendRatio.value =
-    blurBlendPass.uniforms.blendRatio.value =
-      scene3dController.blurBlendRatio * (1 - zoom)
+  blurBlendPass.uniforms.blendRatio.value = scene3dController.blurBlendRatio * (1 - zoom)
 
   composer.render(0.1)
 

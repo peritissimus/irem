@@ -1,10 +1,10 @@
 import { config } from '../config.js'
-import THREE from '../libs/threejs/Three.js'
+import THREE, { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/stepCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/stepCircle/fragment.glsl?raw'
 
-const vertexShader = THREE._evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = THREE._evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource, { THREE })
+const fragmentShader = evalShader(fragmentShaderSource, { THREE })
 
 function init() {
   createMaterial()
@@ -48,8 +48,8 @@ function createGeometry() {
     positions[i * 3 + 2] = 0
   }
 
-  geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
-  stepCircle.particles = new THREE.PointCloud(geometry, stepCircle.material)
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  stepCircle.particles = new THREE.Points(geometry, stepCircle.material)
 }
 
 function updateStepTimes() {

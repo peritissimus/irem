@@ -37,7 +37,7 @@ export class PostParticle extends THREE.Mesh {
       fogDensity: { type: 'f', value: 0.025 },
       fogFar: { type: 'f', value: 2000 },
       fogNear: { type: 'f', value: 1 },
-      texture: { type: 't', value: new THREE.Texture(blank) },
+      tex: { type: 't', value: new THREE.Texture(blank) },
       u_time: { type: 'f', value: Math.random() * 100 },
       alpha: { type: 'f', value: 1 },
       fade: { type: 'f', value: 0 },
@@ -46,7 +46,7 @@ export class PostParticle extends THREE.Mesh {
       showScale: { type: 'f', value: 1 },
     }
     super(
-      new THREE.PlaneBufferGeometry(size, size, 1, 1),
+      new THREE.PlaneGeometry(size, size, 1, 1),
       new THREE.ShaderMaterial({
         uniforms,
         vertexShader,
@@ -60,7 +60,7 @@ export class PostParticle extends THREE.Mesh {
       this,
       {
         uniforms,
-        texture: uniforms.texture.value,
+        texture: uniforms.tex.value,
         renderDepth: 0,
         canvasStatus: -1,
         interactive: true,

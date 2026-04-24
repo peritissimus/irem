@@ -1,13 +1,11 @@
-import THREE from '../../libs/threejs/Three.js'
-
-THREE.BlendShader = {
+export const BlendShader = {
   uniforms: {
-    tDiffuse: { type: 't', value: null },
-    tDiffuse2: { type: 't', value: null },
-    v: { type: 'f', value: 1 / 512 },
-    h: { type: 'f', value: 1 / 512 },
-    r: { type: 'f', value: 0.35 },
-    blendRatio: { type: 'f', value: 1 },
+    tDiffuse: { value: null },
+    tDiffuse2: { value: null },
+    v: { value: 1 / 512 },
+    h: { value: 1 / 512 },
+    r: { value: 0.35 },
+    blendRatio: { value: 1 },
   },
   vertexShader: [
     'varying vec2 vUv;',
@@ -44,4 +42,4 @@ THREE.BlendShader = {
   ].join('\n'),
 }
 
-export default THREE.BlendShader
+export default BlendShader

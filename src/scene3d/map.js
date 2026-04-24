@@ -1,9 +1,9 @@
-import THREE from '../libs/threejs/Three.js'
+import THREE, { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/map/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/map/fragment.glsl?raw'
 
-const vertexShader = THREE._evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = THREE._evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource, { THREE })
+const fragmentShader = evalShader(fragmentShaderSource, { THREE })
 
 function init() {
   createMaterial()
@@ -31,7 +31,7 @@ function createMaterial() {
 
 function createGeometry() {
   map.geometry = new THREE.OctahedronGeometry(45, 5)
-  map.particles = new THREE.PointCloud(map.geometry, map.material)
+  map.particles = new THREE.Points(map.geometry, map.material)
 }
 
 export const map = {

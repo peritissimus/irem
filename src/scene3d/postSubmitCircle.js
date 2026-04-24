@@ -1,12 +1,12 @@
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
 import { clamp } from '../utils/native.js'
-import THREE from '../libs/threejs/Three.js'
+import THREE, { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/postSubmitCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postSubmitCircle/fragment.glsl?raw'
 
-const vertexShader = THREE._evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = THREE._evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource, { THREE })
+const fragmentShader = evalShader(fragmentShaderSource, { THREE })
 const SIZE = 512
 
 let mesh
@@ -34,7 +34,7 @@ function createMaterial() {
 
   const uniforms = (postSubmitCircle.uniforms = {
     time: { type: 'f', value: 0 },
-    texture: { type: 't', value: new THREE.Texture(canvas) },
+    tex: { type: 't', value: new THREE.Texture(canvas) },
     animation: { type: 'f', value: 0 },
     fade: { type: 'f', value: 0 },
   })
@@ -46,11 +46,11 @@ function createMaterial() {
     depthTest: false,
     fog: false,
   })
-  uniforms.texture.value.needsUpdate = true
+  uniforms.tex.value.needsUpdate = true
 }
 
 function createMesh() {
-  postSubmitCircle.geometry = new THREE.PlaneBufferGeometry(SIZE, SIZE)
+  postSubmitCircle.geometry = new THREE.PlaneGeometry(SIZE, SIZE)
   mesh = postSubmitCircle.mesh = new THREE.Mesh(postSubmitCircle.geometry, postSubmitCircle.material)
   position = mesh.position
 }

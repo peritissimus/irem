@@ -1,8 +1,7 @@
-import THREE from 'three'
+import * as THREE from 'three'
 import snoise2dShader from '../../shaders/noises/snoise2d.glsl?raw'
 import { evalReplace } from '../../utils/stringUtils.js'
 
-THREE.ShaderChunk = THREE.ShaderChunk || {}
 THREE.ShaderChunk.snoise2d = snoise2dShader
 THREE.ShaderChunk.fog_pars_fragment = [
   '#ifdef USE_FOG',
@@ -28,7 +27,7 @@ THREE.ShaderChunk.fog_fragment = [
   'gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );',
   '#endif',
 ].join('\n')
-THREE._evalReplace = (source, scopeVariables) => evalReplace(source, scopeVariables)
+export const evalShader = (source, scopeVariables) => evalReplace(source, scopeVariables)
 
 if (typeof window !== 'undefined') {
   window.THREE = THREE

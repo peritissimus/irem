@@ -1,9 +1,9 @@
-import THREE from '../libs/threejs/Three.js'
+import THREE, { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/fakeParticles/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/fakeParticles/fragment.glsl?raw'
 
-const vertexShader = THREE._evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = THREE._evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource, { THREE })
+const fragmentShader = evalShader(fragmentShaderSource, { THREE })
 const AMOUNT = 60000
 
 function init(scene) {
@@ -40,8 +40,8 @@ function init(scene) {
     positions[i * 3 + 1] = 0
     positions[i * 3 + 2] = 0
   }
-  geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
-  fakeParticles.particles = new THREE.PointCloud(geometry, material)
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  fakeParticles.particles = new THREE.Points(geometry, material)
   scene.add(fakeParticles.particles)
 }
 

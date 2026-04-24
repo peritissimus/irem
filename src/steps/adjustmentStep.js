@@ -178,7 +178,7 @@ function onValidateBtn() {
     drawnHeight,
   )
   submitCtx.restore()
-  postSubmitCircle.uniforms.texture.value.needsUpdate = true
+  postSubmitCircle.uniforms.tex.value.needsUpdate = true
   animator.killTweensOf(postSubmitCircle.uniforms.fade, 'value')
   animator.set(postSubmitCircle.uniforms.fade, { value: 1 })
   animator.killTweensOf(postSubmitCircle.uniforms.animation, 'value')

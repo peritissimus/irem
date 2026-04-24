@@ -1,6 +1,6 @@
 precision mediump float;
 
-uniform sampler2D texture;
+uniform sampler2D tex;
 uniform float u_time;
 uniform float fade;
 uniform float alpha;
@@ -54,7 +54,7 @@ void main() {
 
     vec2 uv = vUv;
 
-    vec4 imageColor= texture2D(texture, uv);
+    vec4 imageColor= texture2D(tex, uv);
 
 
     vec4 color = vec4(mix(bgColor, imageColor.rgb, u_pop), 1.);

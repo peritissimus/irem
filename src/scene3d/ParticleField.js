@@ -1,10 +1,10 @@
 import { config } from '../config.js'
-import THREE from '../libs/threejs/Three.js'
+import THREE, { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/particleWave/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/particleWave/fragment.glsl?raw'
 
-const vertexShader = THREE._evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = THREE._evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource, { THREE })
+const fragmentShader = evalShader(fragmentShaderSource, { THREE })
 
 export class ParticleField {
   constructor(amount, offsetX, offsetZ) {
@@ -62,8 +62,8 @@ export class ParticleField {
         positions[i++] = z * spacing
       }
     }
-    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3))
-    this.particles = new THREE.PointCloud(geometry, this.material)
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    this.particles = new THREE.Points(geometry, this.material)
   }
 
   move(x, z) {

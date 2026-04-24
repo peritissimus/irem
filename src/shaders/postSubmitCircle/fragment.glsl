@@ -1,7 +1,7 @@
 precision mediump float;
 uniform float time;
 uniform float fade;
-uniform sampler2D texture;
+uniform sampler2D tex;
 varying float vAnimation;
 
 varying vec2 vUv;
@@ -70,7 +70,7 @@ void main() {
         color = vec4(mix(vec3(1., .65, .75), vec3(1., 1., 1.), clamp(alpha, 0., 1.)), alpha * outerGlow );
     } else {
         ratio = clampNorm(d, 0., thersh);
-        color = texture2D(texture, (vUv - .5) / scale + .5);
+        color = texture2D(tex, (vUv - .5) / scale + .5);
 
         color.rgb = mix(color.rgb, getSepiaColor(color.rgb), sepiaRatio *.7);
 
