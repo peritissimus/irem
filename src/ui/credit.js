@@ -2,7 +2,7 @@ import $ from 'jquery'
 import { inputController } from '../controllers/inputController.js'
 import { trackPage } from '../controllers/trackingController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original AMD factory also listed `config`, `uiController`, and
 // `stageReference` as deps but never used them — dropped.
@@ -45,26 +45,22 @@ function show() {
   isVisible = true
   trackPage({ trackPage: 'footer-credits' })
   container.show()
-  EKTweener.fromTo(
-    wrapper,
-    0.5,
-    { transform3d: 'translate3d(332px,0,0)' },
-    { transform3d: 'translate3d(0,0,0)' },
-  )
+  animator.fromTo(wrapper[0], { x: 332 }, { duration: 0.5, x: 0, ease: 'circ.out' })
   container.find('.bss-inner > *').each(function (i) {
-    EKTweener.to(this, 0, {
-      transform3d: 'translate3d(0,30px,0)',
+    animator.set(this, {
+      y: 30,
       opacity: 0,
     })
-    EKTweener.to(this, 0.5, {
+    animator.to(this, {
+      duration: 0.5,
       opacity: 1,
-      ease: 'linear',
+      ease: 'none',
       delay: 0.1 * i,
     })
-    // NOTE: `translateZ(0,0,0)` is malformed (translateZ takes one arg) —
-    // typo in original, preserved verbatim.
-    EKTweener.to(this, 0.5, {
-      transform3d: 'translateZ(0,0,0)',
+    animator.to(this, {
+      duration: 0.5,
+      y: 0,
+      ease: 'circ.out',
       delay: 0.1 * i,
     })
   })
@@ -73,8 +69,10 @@ function show() {
 function hide() {
   if (!isVisible) return
   isVisible = false
-  EKTweener.to(wrapper, 0.5, {
-    transform3d: 'translate3d(332px,0,0)',
+  animator.to(wrapper[0], {
+    duration: 0.5,
+    x: 332,
+    ease: 'circ.out',
     onComplete: () => {
       container.hide()
     },

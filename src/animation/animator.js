@@ -9,6 +9,10 @@ export const animator = {
     return gsap.fromTo(target, fromVars, toVars)
   },
 
+  set(target, vars) {
+    return gsap.set(target, vars)
+  },
+
   timeline(vars) {
     return gsap.timeline(vars)
   },
