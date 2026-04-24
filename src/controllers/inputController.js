@@ -1,13 +1,12 @@
 import signals from '../events/signal.js'
-import $ from 'jquery'
 
 const HANDLER_TYPES = ['over', 'out', 'tap', 'click', 'down', 'move', 'up', 'wheel']
 
 const hasTouch = 'ontouchstart' in window
 
-const JQUERY_EVENT_NAMES = hasTouch
-  ? { over: 'touchstart mouseenter', out: 'touchend mouseleave' }
-  : { over: 'mouseenter', out: 'mouseleave' }
+const POINTER_EVENT_NAMES = hasTouch
+  ? { over: ['touchstart', 'mouseenter'], out: ['touchend', 'mouseleave'] }
+  : { over: ['mouseenter'], out: ['mouseleave'] }
 
 const INTERACTIVE_NODE_NAMES = ['input', 'select', 'label', 'option', 'textarea']
 const DEFAULT_PREVENT_DEFAULT_NODE_NAMES = ['input', 'select', 'label', 'textarea', 'option']
@@ -61,7 +60,9 @@ function addInput(target, type, handler) {
 
   target[`__${type}`] = handler
   if (type === 'over' || type === 'out') {
-    $(target).bind(JQUERY_EVENT_NAMES[type], handler)
+    for (const eventName of POINTER_EVENT_NAMES[type]) {
+      target.addEventListener(eventName, handler, false)
+    }
   }
   target.__hasInput = true
   inputController.elems.push(target)
@@ -78,12 +79,22 @@ function removeInput(target, type) {
 
   if (type) {
     if ((type === 'over' || type === 'out') && target[`__${type}`]) {
-      $(target).unbind(JQUERY_EVENT_NAMES[type], target[`__${type}`])
+      for (const eventName of POINTER_EVENT_NAMES[type]) {
+        target.removeEventListener(eventName, target[`__${type}`], false)
+      }
     }
     target[`__${type}`] = undefined
   } else {
-    if (target.__over) $(target).unbind(JQUERY_EVENT_NAMES.over, target.__over)
-    if (target.__out) $(target).unbind(JQUERY_EVENT_NAMES.out, target.__out)
+    if (target.__over) {
+      for (const eventName of POINTER_EVENT_NAMES.over) {
+        target.removeEventListener(eventName, target.__over, false)
+      }
+    }
+    if (target.__out) {
+      for (const eventName of POINTER_EVENT_NAMES.out) {
+        target.removeEventListener(eventName, target.__out, false)
+      }
+    }
     for (const handlerType of HANDLER_TYPES) {
       target[`__${handlerType}`] = undefined
     }
