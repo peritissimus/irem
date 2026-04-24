@@ -1,6 +1,4 @@
-import $ from 'jquery'
 import signals from '../events/signal.js'
-import { bind } from '../utils/native.js'
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'
 import { postController } from '../controllers/postController.js'
@@ -11,6 +9,7 @@ import { trackPage } from '../controllers/trackingController.js'
 import { preloaderController } from '../controllers/preloaderController.js'
 import { socialShare } from '../utils/socialUtils.js'
 import { animator } from '../animation/animator.js'
+import { hide as hideElement, qs, setText, show as showElement, withDescendants } from '../utils/dom.js'
 
 const CONTENT_WIDTH = 348
 
@@ -37,9 +36,9 @@ let preShowPost
 export const onHidden = new signals.Signal()
 
 function preInit() {
-  container = $('.post-2d')
-  _containerStyle = container[0].style
-  preloaderController.add(container)
+  container = qs('.post-2d')
+  _containerStyle = container.style
+  preloaderController.add(withDescendants(container))
 }
 
 function init() {
@@ -48,19 +47,19 @@ function init() {
 }
 
 function initElements() {
-  imgEl = $('.post-2d-img')
-  centerWrapper = $('.post-2d-center-wrapper')
-  _centerWrapperStyle = centerWrapper[0].style
-  contentWrapper = $('.post-2d-content-wrapper')
-  shareBtn = $('.post-2d-share-btn')
-  matchedWrapper = $('.post-2d-matched-wrapper')
-  matchedNumEl = $('.post-2d-matched-num')
-  matchedSingularEl = $('.post-2d-matched-singular')
-  matchedPluralEl = $('.post-2d-matched-plural')
-  matchedTagEl = $('.post-2d-matched-tag')
-  messageEl = $('.post-2d-message')
-  nameEl = $('.post-2d-name')
-  closeCircleBtn = $('.post-2d-close-btn')[0].circleBtn
+  imgEl = qs('.post-2d-img')
+  centerWrapper = qs('.post-2d-center-wrapper')
+  _centerWrapperStyle = centerWrapper.style
+  contentWrapper = qs('.post-2d-content-wrapper')
+  shareBtn = qs('.post-2d-share-btn')
+  matchedWrapper = qs('.post-2d-matched-wrapper')
+  matchedNumEl = qs('.post-2d-matched-num')
+  matchedSingularEl = qs('.post-2d-matched-singular')
+  matchedPluralEl = qs('.post-2d-matched-plural')
+  matchedTagEl = qs('.post-2d-matched-tag')
+  messageEl = qs('.post-2d-message')
+  nameEl = qs('.post-2d-name')
+  closeCircleBtn = qs('.post-2d-close-btn').circleBtn
 }
 
 function initEvents() {
@@ -72,8 +71,7 @@ function initEvents() {
 }
 
 function onShareClicked() {
-  const $this = $(this)
-  const type = $this.data('type')
+  const type = this.dataset.type
   // NOTE: TWITTER_POST_DESCRIPTION and POST_DESCRIPTION are undeclared globals
   //       in the original — would throw ReferenceError if invoked. Preserved.
   socialShare(
@@ -94,19 +92,15 @@ function preShow(post) {
     window.__STATIC_POST_IMAGE ||
     window.__UPLOADS_ROOT + 'posts/' + post.img + '/resized.jpg'
 
-  imgEl.css('backgroundImage', 'none')
-  imgEl.css({
-    backgroundImage: 'url(' + imgUrl + ')',
-    width: post.resized_img_width,
-    height: post.resized_img_height,
-  })
-  centerWrapper.css({
-    width: +post.resized_img_width + CONTENT_WIDTH,
-    height: +post.resized_img_height,
-    marginLeft: (-post.resized_img_width - CONTENT_WIDTH) >> 1,
-    marginTop: -post.resized_img_height >> 1,
-  })
-  nameEl.text(post.name)
+  imgEl.style.backgroundImage = 'none'
+  imgEl.style.backgroundImage = `url(${imgUrl})`
+  imgEl.style.width = `${post.resized_img_width}px`
+  imgEl.style.height = `${post.resized_img_height}px`
+  centerWrapper.style.width = `${+post.resized_img_width + CONTENT_WIDTH}px`
+  centerWrapper.style.height = `${+post.resized_img_height}px`
+  centerWrapper.style.marginLeft = `${(-post.resized_img_width - CONTENT_WIDTH) >> 1}px`
+  centerWrapper.style.marginTop = `${-post.resized_img_height >> 1}px`
+  setText(nameEl, post.name)
 
   if (!post.tags && !post.isLoadingTags) {
     post.isLoadingTags = true
@@ -118,7 +112,7 @@ function preShow(post) {
 
 function show(post) {
   trackPage({ trackPage: 'memory-view' })
-  container.show()
+  showElement(container)
   currentPost = post
   if (history.replaceState) {
     history.replaceState(
@@ -129,17 +123,17 @@ function show(post) {
         (parseInt(post.id, 10) + config.POST_ID_OFFSET),
     )
   }
-  animator.killTweensOf(centerWrapper[0], 'opacity')
-  animator.fromTo(centerWrapper[0], { opacity: 0 }, { duration: 1, opacity: 1, ease: 'none' })
-  animator.killTweensOf(contentWrapper[0], 'width')
-  animator.set(contentWrapper[0], { width: 0 })
-  animator.to(contentWrapper[0], {
+  animator.killTweensOf(centerWrapper, 'opacity')
+  animator.fromTo(centerWrapper, { opacity: 0 }, { duration: 1, opacity: 1, ease: 'none' })
+  animator.killTweensOf(contentWrapper, 'width')
+  animator.set(contentWrapper, { width: 0 })
+  animator.to(contentWrapper, {
     duration: 0.6,
     delay: 0.4,
     width: CONTENT_WIDTH,
     ease: 'circ.out',
   })
-  contentWrapper[0].scrollpane.onResize()
+  contentWrapper.scrollpane.onResize()
 }
 
 function onRelatedTagsLoaded(post) {
@@ -148,7 +142,7 @@ function onRelatedTagsLoaded(post) {
 }
 
 function buildMessageItem(post) {
-  let html = $('<div>').text(post.text).html()
+  let html = escapeHtml(post.text)
   if (post.tags) {
     const tagCounts = post.tags
     const tagNames = []
@@ -174,39 +168,45 @@ function buildMessageItem(post) {
       )
     }
   }
-  post.msgItem = $('<div>').html(html)
-  post.msgItem.find('.post-2d-message-tag').each(function attachTagHandlers() {
-    inputController.add(this, 'over', bind(onTagOver, this))
-    inputController.add(this, 'out', bind(onTagOut, this))
-    inputController.add(this, 'click', bind(onTagClick, this))
+  post.msgItem = document.createElement('div')
+  post.msgItem.innerHTML = html
+  post.msgItem.querySelectorAll('.post-2d-message-tag').forEach((tag) => {
+    inputController.add(tag, 'over', onTagOver)
+    inputController.add(tag, 'out', onTagOut)
+    inputController.add(tag, 'click', onTagClick)
   })
 }
 
+function escapeHtml(text) {
+  const div = document.createElement('div')
+  div.textContent = text
+  return div.innerHTML
+}
+
 function onTagOver() {
-  if (contentWrapper[0].scrollpane.isDown) return
-  $(this).addClass('hover')
-  const tagName = decodeURIComponent($(this).data('tagName'))
-  const tagCount = decodeURIComponent($(this).data('tagPostsCount'))
-  matchedNumEl.text(tagCount)
-  matchedTagEl.text(tagName)
-  matchedWrapper.show()
-  matchedSingularEl.css('display', tagCount === 1 ? 'inline' : 'none')
-  matchedPluralEl.css('display', tagCount > 1 ? 'inline' : 'none')
+  if (contentWrapper.scrollpane.isDown) return
+  this.classList.add('hover')
+  const tagName = decodeURIComponent(this.dataset.tagName)
+  const tagCount = decodeURIComponent(this.dataset.tagPostsCount)
+  setText(matchedNumEl, tagCount)
+  setText(matchedTagEl, tagName)
+  showElement(matchedWrapper)
+  matchedSingularEl.style.display = tagCount === 1 ? 'inline' : 'none'
+  matchedPluralEl.style.display = tagCount > 1 ? 'inline' : 'none'
 }
 
 function onTagOut() {
-  $(this).removeClass('hover')
-  matchedWrapper.hide()
+  this.classList.remove('hover')
+  hideElement(matchedWrapper)
 }
 
 function onTagClick() {
-  postController.searchPosts($(this).data('tagName'))
+  postController.searchPosts(this.dataset.tagName)
   hide()
 }
 
 function updateMessage() {
-  messageEl.find('> *').detach()
-  messageEl.append(preShowPost.msgItem)
+  messageEl.replaceChildren(preShowPost.msgItem)
 }
 
 function hide() {
@@ -214,13 +214,13 @@ function hide() {
     history.replaceState(null, '', config.SITE_URL + '/')
   }
   onHidden.dispatch()
-  animator.killTweensOf(centerWrapper[0], 'opacity')
-  animator.to(centerWrapper[0], {
+  animator.killTweensOf(centerWrapper, 'opacity')
+  animator.to(centerWrapper, {
     duration: 0.5,
     opacity: 0,
     ease: 'none',
     onComplete() {
-      container.hide()
+      hideElement(container)
     },
   })
 }
