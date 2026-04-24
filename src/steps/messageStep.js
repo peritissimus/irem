@@ -7,7 +7,7 @@ import { stepController } from '../controllers/stepController.js'
 import { inputController } from '../controllers/inputController.js'
 import { postController } from '../controllers/postController.js'
 import { uiController } from '../controllers/uiController.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 let container
 let itemsWrapper
@@ -163,8 +163,13 @@ function moveCaretToEnd(node) {
 
 function focusField(id, duration) {
   const field = fieldsById[id]
-  EKTweener.to(itemsWrapper, duration, {
-    transform3d: 'translate3d(0, ' + field.__focusY + 'px, 0)',
+  // NOTE: original used `transform3d: 'translate3d(0, Ypx, 0)'` — migrated to
+  // gsap's `y` which animates translateY through its transform system.
+  animator.killTweensOf(itemsWrapper[0], 'y')
+  animator.to(itemsWrapper[0], {
+    duration,
+    y: field.__focusY,
+    ease: 'none',
   })
 
   if (id === 'name') {
@@ -191,21 +196,27 @@ function focusField(id, duration) {
     }
   })
   allInputsAndTerms.each(function fadeField(i) {
+    const container = this.__container
     if (i > focusedIndex + 1) {
-      EKTweener.to(this.__container, duration, {
+      animator.killTweensOf(container[0], 'opacity')
+      animator.to(container[0], {
+        duration,
         opacity: 0,
-        ease: 'linear',
+        ease: 'none',
         onComplete() {
-          // NOTE: `_appliedTarget` is a property the EKTweener sets on its
-          // tween context to expose the resolved style object — preserved.
-          this._appliedTarget.visibility = 'hidden'
+          // NOTE: original set `this._appliedTarget.visibility = 'hidden'`
+          // where `_appliedTarget` was the element's style object; equivalent
+          // to setting CSS `visibility: hidden` on the container.
+          container.css('visibility', 'hidden')
         },
       })
     } else {
       this.__container.css('visibility', 'visible')
-      EKTweener.to(this.__container, duration, {
+      animator.killTweensOf(container[0], 'opacity')
+      animator.to(container[0], {
+        duration,
         opacity: i === focusedIndex ? 1 : 0.75,
-        ease: 'linear',
+        ease: 'none',
       })
     }
     this.__container.toggleClass('focus', i === focusedIndex)
