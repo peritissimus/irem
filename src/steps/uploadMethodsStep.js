@@ -8,7 +8,7 @@ import { uiController } from '../controllers/uiController.js'
 import { inputController } from '../controllers/inputController.js'
 import { facebook } from '../socials/facebook.js'
 import { instagram } from '../socials/instagram.js'
-import { EKTweener } from '../ektweener.js'
+import { animator } from '../animation/animator.js'
 
 // NOTE: original AMD factory captured `t.transform3DStyle` and
 // `t.ERROR_MESSAGES` at module-load time — both are read inside functions
@@ -225,7 +225,8 @@ function setItemImage(node, url) {
 function renderView(view) {
   const isSwitch =
     currentView.type !== view.type || currentView.social !== view.social
-  EKTweener.to(albumContainer, 0.5, { opacity: 1, ease: 'linear' })
+  animator.killTweensOf(albumContainer[0], 'opacity')
+  animator.to(albumContainer[0], { duration: 0.5, opacity: 1, ease: 'none' })
 
   if (isSwitch) {
     if (view.social === 'facebook' && view.type === 'photos') {
@@ -358,12 +359,25 @@ function doUpload(fileOrUrl) {
 function showUploading() {
   uiController.lock('upload-image')
   loadingEl.show()
-  EKTweener.to(loadingEl, 0, { opacity: 0 })
-  EKTweener.to(loadingEl, 0.5, { delay: 0.3, opacity: 1, ease: 'linear' })
-  EKTweener.to(selectionContainer, 0.3, { opacity: 0, ease: 'linear' })
-  EKTweener.to(albumContainer, 0.3, {
+  animator.killTweensOf(loadingEl[0], 'opacity')
+  animator.set(loadingEl[0], { opacity: 0 })
+  animator.to(loadingEl[0], {
+    duration: 0.5,
+    delay: 0.3,
+    opacity: 1,
+    ease: 'none',
+  })
+  animator.killTweensOf(selectionContainer[0], 'opacity')
+  animator.to(selectionContainer[0], {
+    duration: 0.3,
     opacity: 0,
-    ease: 'linear',
+    ease: 'none',
+  })
+  animator.killTweensOf(albumContainer[0], 'opacity')
+  animator.to(albumContainer[0], {
+    duration: 0.3,
+    opacity: 0,
+    ease: 'none',
     onComplete() {
       albumContainer.hide()
     },
@@ -373,9 +387,16 @@ function showUploading() {
 function hideUploading() {
   uiController.unlock('upload-image')
   loadingEl.hide()
-  EKTweener.to(loadingEl, 0.5, { opacity: 0, ease: 'linear' })
-  EKTweener.to(selectionContainer, 0.3, { opacity: 1, ease: 'linear' })
-  EKTweener.to(albumContainer, 0.3, { opacity: 1, ease: 'linear' })
+  animator.killTweensOf(loadingEl[0], 'opacity')
+  animator.to(loadingEl[0], { duration: 0.5, opacity: 0, ease: 'none' })
+  animator.killTweensOf(selectionContainer[0], 'opacity')
+  animator.to(selectionContainer[0], {
+    duration: 0.3,
+    opacity: 1,
+    ease: 'none',
+  })
+  animator.killTweensOf(albumContainer[0], 'opacity')
+  animator.to(albumContainer[0], { duration: 0.3, opacity: 1, ease: 'none' })
 }
 
 function onUploadSuccess(response) {
@@ -407,38 +428,46 @@ function show() {
   container.show()
   setSelectionType('default')
   iconLocked = false
-  EKTweener.to(loadingEl, 0, { opacity: 0 })
-  EKTweener.to(selectionContainer, 0, { opacity: 1 })
-  EKTweener.to(albumContainer, 0, { opacity: 0 })
+  animator.killTweensOf(loadingEl[0], 'opacity')
+  animator.set(loadingEl[0], { opacity: 0 })
+  animator.killTweensOf(selectionContainer[0], 'opacity')
+  animator.set(selectionContainer[0], { opacity: 1 })
+  animator.killTweensOf(albumContainer[0], 'opacity')
+  animator.set(albumContainer[0], { opacity: 0 })
   albumContainer.hide()
   itemsContainer.find('> *').remove()
-  EKTweener.fromTo(
-    facebookSymbol,
-    0.5,
-    { transform3d: 'translate3d(60px,0,0)', opacity: 0 },
-    { transform3d: 'translate3d(0,0,0)', opacity: 1 },
+  // NOTE: original used `transform3d: 'translate3d(Xpx,0,0)'` — migrated to
+  // gsap's `x` shorthand. Original fromTo omitted `ease` on toVars, which
+  // falls back to EKTweener's default (`easeOutCirc`) — preserved as `circ.out`.
+  animator.killTweensOf(facebookSymbol[0], 'x,opacity')
+  animator.fromTo(
+    facebookSymbol[0],
+    { x: 60, opacity: 0 },
+    { duration: 0.5, x: 0, opacity: 1, ease: 'circ.out' },
   )
-  EKTweener.fromTo(
-    instagramSymbol,
-    0.5,
+  animator.killTweensOf(instagramSymbol[0], 'opacity')
+  animator.fromTo(
+    instagramSymbol[0],
     { opacity: 0 },
-    { opacity: 1, ease: 'linear' },
+    { duration: 0.5, opacity: 1, ease: 'none' },
   )
-  EKTweener.fromTo(
-    localSymbol,
-    0.5,
-    { transform3d: 'translate3d(-60px,0,0)', opacity: 0 },
-    { transform3d: 'translate3d(0,0,0)', opacity: 1 },
+  animator.killTweensOf(localSymbol[0], 'x,opacity')
+  animator.fromTo(
+    localSymbol[0],
+    { x: -60, opacity: 0 },
+    { duration: 0.5, x: 0, opacity: 1, ease: 'circ.out' },
   )
-  EKTweener.fromTo(
-    textsContainer,
-    0.2,
+  animator.killTweensOf(textsContainer[0], 'opacity')
+  animator.fromTo(
+    textsContainer[0],
     { opacity: 0 },
-    { opacity: 1, ease: 'linear' },
+    { duration: 0.2, opacity: 1, ease: 'none' },
   )
-  EKTweener.to(stepCircle.uniforms.focusRatio, 0.3, {
+  animator.killTweensOf(stepCircle.uniforms.focusRatio, 'value')
+  animator.to(stepCircle.uniforms.focusRatio, {
+    duration: 0.3,
     value: 1,
-    ease: 'easeOutCubic',
+    ease: 'power2.out',
   })
 }
 
@@ -451,9 +480,11 @@ function hide() {
   setSelectionType()
   container.hide()
   resetAlbumState()
-  EKTweener.to(stepCircle.uniforms.focusRatio, 0.3, {
+  animator.killTweensOf(stepCircle.uniforms.focusRatio, 'value')
+  animator.to(stepCircle.uniforms.focusRatio, {
+    duration: 0.3,
     value: 0,
-    ease: 'easeInCubic',
+    ease: 'power2.in',
   })
 }
 
