@@ -23,6 +23,7 @@ export class AbstractItem {
   }
 
   onLoad() {
+    if (this.isLoaded) return
     this.isLoaded = true
     AbstractItem.loaded[this.url] = this
     this.callback?.(this)

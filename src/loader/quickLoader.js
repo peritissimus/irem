@@ -116,6 +116,14 @@ function start(onProgress) {
   quickLoader.isLoading = true
 
   const snapshot = queue.splice(0, queue.length)
+  if (!snapshot.length) {
+    quickLoader.isLoading = false
+    quickLoader._sum = 0
+    quickLoader._weight = 0
+    queueMicrotask(() => quickLoader._onLoading?.(1))
+    return
+  }
+
   while (snapshot[0]) {
     snapshot.shift().load(onItemLoaded)
   }

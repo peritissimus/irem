@@ -32,11 +32,14 @@ export class ImageItem extends AbstractItem {
   load(callback) {
     super.load(callback)
     const img = (this.content = new Image())
-    img.src = this.url
-    if (img.width) {
+    img.onload = () => this.onLoad()
+    img.onerror = () => {
+      this.error = true
       this.onLoad()
-    } else {
-      img.onload = () => this.onLoad()
+    }
+    img.src = this.url
+    if (img.complete && img.naturalWidth) {
+      this.onLoad()
     }
   }
 
