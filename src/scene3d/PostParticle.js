@@ -53,6 +53,7 @@ export class PostParticle extends THREE.Mesh {
         vertexShader,
         fragmentShader,
         depthTest: false,
+        depthWrite: false,
         transparent: true,
         fog: true,
       }),
