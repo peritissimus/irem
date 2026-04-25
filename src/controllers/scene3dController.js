@@ -14,12 +14,13 @@ import { navPostParticles } from '../scene3d/navPostParticles.js'
 import { fakeParticles } from '../scene3d/fakeParticles.js'
 import { qs } from '../utils/dom.js'
 import {
-  FogExp2,
+  DepthTexture,
   LinearSRGBColorSpace,
   Object3D,
   PerspectiveCamera,
   Raycaster,
   Scene,
+  UnsignedShortType,
   UnsignedByteType,
   Vector3,
   WebGLRenderer,
@@ -27,14 +28,15 @@ import {
 } from 'three'
 import '../libs/threejs/Three.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { SavePass } from 'three/examples/jsm/postprocessing/SavePass.js'
+import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass.js'
 import { RGBShiftShader } from 'three/examples/jsm/shaders/RGBShiftShader.js'
 import { HorizontalTiltShiftShader } from 'three/examples/jsm/shaders/HorizontalTiltShiftShader.js'
 import { VerticalTiltShiftShader } from 'three/examples/jsm/shaders/VerticalTiltShiftShader.js'
 import { BlendShader } from '../postprocessing/shaders/BlendShader.js'
 import { CustomShader } from '../postprocessing/shaders/CustomShader.js'
+import { AtmosphericFogShader } from '../postprocessing/shaders/AtmosphericFogShader.js'
 
 // NOTE: callers of moveTo/resetCamera pass ease strings using EKTweener's
 // naming convention (e.g. 'easeInOutSine', 'easeOutSine', 'linear'). Map them
@@ -128,8 +130,10 @@ let vblurPass = null
 let blurBlendPass = null
 let rgbShiftPass = null
 let customShaderPass = null
+let atmosphericFogPass = null
 let savePass
-let renderPass
+let particleSceneTarget
+let texturePass
 
 // Interactive raycast hover target
 let hoveredInteractivePost = null
@@ -188,7 +192,6 @@ function init() {
   mainScene.add(postSubmitCircle.mesh)
 
   particlesScene = new Scene()
-  particlesScene.fog = new FogExp2(0x070707, 0.0006)
 
   particleFields = []
   for (let i = 0, len = GRID_SEG * GRID_SEG; i < len; i += 1) {
@@ -226,7 +229,18 @@ function init() {
   // to [0,1]) so the math stayed bounded.
   const composerTarget = new WebGLRenderTarget(1, 1, { type: UnsignedByteType })
   composer = new EffectComposer(renderer, composerTarget)
-  renderPass = new RenderPass(particlesScene, camera)
+  // Render the particle scene into a dedicated target so the atmospheric fog
+  // pass can sample its depth without forming a feedback loop with the
+  // composer's ping-pong buffers (sharing renderTarget1.depthTexture across
+  // passes triggered GL_INVALID_OPERATION feedback warnings).
+  particleSceneTarget = new WebGLRenderTarget(1, 1, {
+    type: UnsignedByteType,
+    depthBuffer: true,
+    depthTexture: new DepthTexture(1, 1, UnsignedShortType),
+  })
+  texturePass = new TexturePass(particleSceneTarget.texture)
+  atmosphericFogPass = scene3dController.atmosphericFog = new ShaderPass(AtmosphericFogShader)
+  atmosphericFogPass.uniforms.tDepth.value = particleSceneTarget.depthTexture
   rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
   const saveTarget = new WebGLRenderTarget(1, 1, { type: UnsignedByteType })
   savePass = new SavePass(saveTarget)
@@ -237,7 +251,8 @@ function init() {
   customShaderPass = scene3dController.customShader = new ShaderPass(CustomShader)
   customShaderPass.noiseSpeed = 1
 
-  composer.addPass(renderPass)
+  composer.addPass(texturePass)
+  composer.addPass(atmosphericFogPass)
   composer.addPass(savePass)
   composer.addPass(rgbShiftPass)
   composer.addPass(hblurPass)
@@ -293,6 +308,16 @@ async function initDevGUI() {
   noise.add(customShaderPass.uniforms.vAlpha, 'value', 0, 1, 0.01).name('vignette alpha')
   noise.add(rgbShiftPass.uniforms.amount, 'value', 0, 0.01, 0.0001).name('rgb shift')
   noise.add(scene3dController, 'blurriness', 0, 5, 0.01).name('blur')
+
+  const fog = gui.addFolder('fog')
+  fog.add(atmosphericFogPass.uniforms.fogDensity, 'value', 0, 0.0015, 0.00001).name('density')
+  fog.add(atmosphericFogPass.uniforms.fogNear, 'value', 0, 1800, 1).name('near')
+  fog.add(atmosphericFogPass.uniforms.fogFar, 'value', 100, 3000, 1).name('far')
+  fog.add(atmosphericFogPass.uniforms.strength, 'value', 0, 1, 0.01).name('strength')
+  fog.add(atmosphericFogPass.uniforms.fogOpacity, 'value', 0, 1, 0.01).name('opacity')
+  fog.add(atmosphericFogPass.uniforms.backgroundFog, 'value', 0, 0.5, 0.001).name('background')
+  fog.addColor(atmosphericFogPass.uniforms.fogColor, 'value').name('color')
+  fog.close()
 
   const fp = gui.addFolder('fakeParticles')
   fp.add(fakeParticles, 'fade', 0, 1).name('fade')
@@ -400,6 +425,9 @@ function onResize() {
     composer.setSize(windowWidth, windowHeight)
     savePass.renderTarget = composer.renderTarget1.clone()
     blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget.texture
+  }
+  if (particleSceneTarget) {
+    particleSceneTarget.setSize(windowWidth, windowHeight)
   }
 }
 
@@ -592,6 +620,11 @@ function render() {
 
   customShaderPass.uniforms.zoom.value = Math.pow(zoom, 1.5)
   customShaderPass.uniforms.time.value += customShaderPass.noiseSpeed
+  atmosphericFogPass.uniforms.time.value += 1
+  atmosphericFogPass.uniforms.strength.value +=
+    ((scene3dController.hasControl ? 1 : 0) - atmosphericFogPass.uniforms.strength.value) * 0.06
+  atmosphericFogPass.uniforms.cameraNear.value = camera.near
+  atmosphericFogPass.uniforms.cameraFar.value = camera.far
 
   const blurriness = scene3dController.blurriness
   hblurPass.uniforms.h.value = blurriness / (0.75 * windowWidth)
@@ -603,6 +636,13 @@ function render() {
     blurBlendPass.uniforms.r.value =
       0.5
   blurBlendPass.uniforms.blendRatio.value = scene3dController.blurBlendRatio * (1 - zoom)
+
+  // Render particles into the dedicated target so the fog pass has a real
+  // depth buffer to sample. The TexturePass then feeds this into the composer.
+  renderer.setRenderTarget(particleSceneTarget)
+  renderer.clear(true, true, false)
+  renderer.render(particlesScene, camera)
+  renderer.setRenderTarget(null)
 
   composer.render(0.1)
 
@@ -848,6 +888,7 @@ export const scene3dController = {
   blurBlend: null,
   rgbShift: null,
   customShader: null,
+  atmosphericFog: null,
   init,
   render,
   showMap,
