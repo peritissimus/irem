@@ -164,23 +164,14 @@ test('nav search button opens the search overlay', async ({ page }) => {
   expect(consoleErrors).toEqual([])
 })
 
-test('footer terms link opens the terms panel', async ({ page }) => {
+test('footer excludes retired campaign links', async ({ page }) => {
   const { pageErrors, consoleErrors } = await bootApp(page)
 
-  // Terms open via .footer-link-terms (onTermsClick → uiController.showTerms()).
-  // The task description referred to "header-terms-btn" but the real trigger
-  // lives in the footer — verified against src/ui/footer.js.
-  const termsLink = page.locator('.footer-link-terms')
-  await expect(termsLink).toBeVisible()
-  await termsLink.click()
-
-  await expect(page.locator('.terms')).toBeVisible()
-  await expect(page.locator('.terms-title')).toBeVisible()
-
-  // Terms panel slides in over 0.5s; give the slide + scrollpane init time.
-  await page.waitForTimeout(1000)
-
-  await expect(page).toHaveScreenshot('after-terms-click.png', { maxDiffPixelRatio: 0.02 })
+  await expect(page.locator('.footer-logo-wrapper')).toHaveCount(0)
+  await expect(page.locator('.footer-link-lang')).toHaveCount(0)
+  await expect(page.locator('.footer-link-terms')).toHaveCount(0)
+  await expect(page.locator('.footer-link-donate')).toHaveCount(0)
+  await expect(page.locator('.footer-share')).toHaveCount(0)
 
   expect(pageErrors).toEqual([])
   expect(consoleErrors).toEqual([])

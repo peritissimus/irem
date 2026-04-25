@@ -42,8 +42,8 @@ function bindElements() {
 function bindEvents() {
   shareBtn.forEach((node) => inputController.add(node, 'click', onShareClick))
   langItems.forEach((node) => inputController.add(node, 'click', onLangClick))
-  inputController.add(soundBtn, 'click', onSoundClick)
-  inputController.add(termsLink, 'click', onTermsClick)
+  if (soundBtn) inputController.add(soundBtn, 'click', onSoundClick)
+  if (termsLink) inputController.add(termsLink, 'click', onTermsClick)
   // NOTE: original never wires creditsLink to onCreditsClick — dead fn preserved below
   qsa('.track-link', container).forEach((link) => {
     inputController.add(link, 'click', onTrackLinkClick)
@@ -55,6 +55,7 @@ function bindEvents() {
 }
 
 function onMuteToggled(muted) {
+  if (!soundBtn) return
   toggleClass(soundBtn, 'selected', !muted)
 }
 
