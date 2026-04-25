@@ -35,6 +35,14 @@ export class ImageItem extends AbstractItem {
     img.onload = () => this.onLoad()
     img.onerror = () => {
       this.error = true
+      // Replace broken Image with a 1×1 transparent canvas so any
+      // downstream drawImage / texture-upload call gets a valid source
+      // instead of throwing "Passed-in image is broken". Consumers that
+      // care can check `item.error`.
+      const fallback = document.createElement('canvas')
+      fallback.width = 1
+      fallback.height = 1
+      this.content = fallback
       this.onLoad()
     }
     img.src = this.url
