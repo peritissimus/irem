@@ -1,7 +1,8 @@
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
 import { clamp } from '../utils/native.js'
-import THREE, { evalShader } from '../libs/threejs/Three.js'
+import * as THREE from 'three'
+import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/postSubmitCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postSubmitCircle/fragment.glsl?raw'
 

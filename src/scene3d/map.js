@@ -1,4 +1,5 @@
-import THREE, { evalShader } from '../libs/threejs/Three.js'
+import * as THREE from 'three'
+import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/map/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/map/fragment.glsl?raw'
 

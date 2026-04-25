@@ -5,7 +5,8 @@ import { fakeParticles } from './fakeParticles.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { onHidden as post2dHidden } from '../ui/post2d.js'
 import { lerp, clamp } from '../utils/native.js'
-import THREE from '../libs/threejs/Three.js'
+import * as THREE from 'three'
+import '../libs/threejs/Three.js'
 import { animator } from '../animation/animator.js'
 
 const particles = []

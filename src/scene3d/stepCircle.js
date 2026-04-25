@@ -1,5 +1,6 @@
 import { config } from '../config.js'
-import THREE, { evalShader } from '../libs/threejs/Three.js'
+import * as THREE from 'three'
+import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/stepCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/stepCircle/fragment.glsl?raw'
 
