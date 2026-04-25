@@ -534,6 +534,10 @@ function render() {
     const candidates = searchMeshes.concat(navMeshes)
     if (hoveredInteractivePost) candidates.unshift(hoveredInteractivePost)
 
+    // Camera moved this frame; raycast runs before composer.render so the
+    // matrix updates haven't happened yet. Update the camera + each candidate
+    // manually so setFromCamera and intersectObject see fresh world matrices.
+    camera.updateMatrixWorld()
     raycaster.setFromCamera({ x: normalizedMouseX, y: normalizedMouseY }, camera)
 
     let hit
@@ -541,6 +545,7 @@ function render() {
       // Modern Three's Raycaster.intersectObject doesn't skip invisible meshes
       // (r71 did). Skip pooled-but-not-yet-positioned PostParticles explicitly.
       if (!candidates[i].visible) continue
+      candidates[i].updateMatrixWorld()
       hit = raycaster.intersectObject(candidates[i])[0]
       if (hit) break
     }
