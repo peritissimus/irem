@@ -59,7 +59,7 @@ export function initConfig() {
   config.NAV_SEARCH_ITEMS_MAX = 200
 
   config.STEP_CIRCLE_PARTICLE_AMOUNT_PER_DEGREE = 100
-  config.DEFAULT_NOISE_RATIO = 0.18
+  config.DEFAULT_NOISE_RATIO = 0.24
 
   const Modernizr = window.Modernizr
   config.transitionStyle = Modernizr.prefixed('transition')

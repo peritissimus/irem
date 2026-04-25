@@ -11,9 +11,9 @@ export const AtmosphericFogShader = {
     fogColor: { value: new Color(0xb8c2c8) },
     fogNear: { value: 700 },
     fogFar: { value: 2800 },
-    fogDensity: { value: 0.00008 },
-    fogOpacity: { value: 0.22 },
-    backgroundFog: { value: 0.05 },
+    fogDensity: { value: 0.00012 },
+    fogOpacity: { value: 0.32 },
+    backgroundFog: { value: 0.10 },
   },
   vertexShader: [
     'varying vec2 vUv;',
