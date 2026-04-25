@@ -1,6 +1,9 @@
+import archivePostsData from './data/archive-posts.json'
+
 export const UPLOADS_ROOT =
   'https://web.archive.org/web/20140624131123im_/http://i-remember.fr/uploads/'
 export const STATIC_POST_IMAGE = '/img/thumbnail.png'
+export const ARCHIVE_POSTS = archivePostsData
 
 export function installArchiveGlobals(signals) {
   window.signals = signals
@@ -9,6 +12,11 @@ export function installArchiveGlobals(signals) {
   window.__STATIC_POST_IMAGE = STATIC_POST_IMAGE
   window.__DISABLE_ARCHIVE_AUDIO__ = true
   window.__DISABLE_ARCHIVE_SOCIALS__ = true
+  // Mirror archived post data onto window so legacy consumers that read
+  // window.DEFAULT_POSTS keep working without a code change. The data
+  // lives in src/data/archive-posts.json now (was a 65 KB inline blob
+  // in index.html) — extracted so HTML payload stays small.
+  window.DEFAULT_POSTS = archivePostsData
 }
 
 export function installModernizrShim() {
@@ -47,8 +55,8 @@ export function installModernizrShim() {
 }
 
 export function installArchiveApiShim() {
-  const archivedPosts = Array.isArray(window.DEFAULT_POSTS?.data?.posts)
-    ? window.DEFAULT_POSTS.data.posts
+  const archivedPosts = Array.isArray(archivePostsData?.data?.posts)
+    ? archivePostsData.data.posts
     : []
   const postIds = new Set(archivedPosts.map((post) => String(post.id)))
   const stopWords = new Set([

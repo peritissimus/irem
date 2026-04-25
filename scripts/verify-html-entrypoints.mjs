@@ -13,7 +13,7 @@ const requiredGlobals = [
   'POST_DESCRIPTION',
   'TWITTER_POST_DESCRIPTION',
   'SUPPORT_WEBGL',
-  'DEFAULT_POSTS',
+  // DEFAULT_POSTS extracted to src/data/archive-posts.json (loaded via archive-runtime).
   'DEFAULT_POST',
   'SETTINGS',
   'INSTAGRAM_ID',
