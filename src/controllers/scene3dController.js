@@ -209,7 +209,14 @@ function init() {
   composer = new EffectComposer(renderer)
   renderPass = new RenderPass(particlesScene, camera)
   rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
-  savePass = new SavePass()
+  // BlendShader does `center / (1 - sum)` (color-dodge). The default jsm
+  // SavePass uses HalfFloatType, so additive-blended bright pixels exceed
+  // 1.0 and the divisor can hit zero / produce NaN — which renders as
+  // opaque black holes in the center of bright particle clusters. Force
+  // UnsignedByteType so values clamp to [0,1] before the blend math runs,
+  // matching the r71 pipeline.
+  const saveTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType })
+  savePass = new SavePass(saveTarget)
   hblurPass = scene3dController.hblur = new ShaderPass(HorizontalTiltShiftShader)
   vblurPass = scene3dController.vblur = new ShaderPass(VerticalTiltShiftShader)
   blurBlendPass = scene3dController.blurBlend = new ShaderPass(BlendShader)
