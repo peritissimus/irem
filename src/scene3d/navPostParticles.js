@@ -111,7 +111,10 @@ function update() {
 
   for (const particle of particles) {
     particle.hasMatch = false
-    particle.uniforms.fade.value += (fadeTarget - particle.uniforms.fade.value) * 0.03
+    // Faster fade-in: original 0.03 lerp meant ~3s for newly-spawned
+    // particles to reach full opacity, which during continuous nav
+    // looked like particles "disappearing". 0.1 = ~0.5s, much snappier.
+    particle.uniforms.fade.value += (fadeTarget - particle.uniforms.fade.value) * 0.1
   }
 
   for (let i = 0; i < foundCount; i++) {
