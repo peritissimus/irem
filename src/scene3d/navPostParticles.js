@@ -4,7 +4,7 @@ import { postController } from '../controllers/postController.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
 import { lerp } from '../utils/native.js'
-import * as THREE from 'three'
+import { Vector3 } from 'three'
 import '../libs/threejs/Three.js'
 
 const maxNewItemsPerFrame = 20
@@ -24,8 +24,8 @@ function init(scene) {
   sizeMin = config.NAV_SEARCH_SIZE_MIN
   sizeMax = config.NAV_SEARCH_SIZE_MAX
   maxItems = config.NAV_SEARCH_ITEMS_MAX
-  cameraToLookAt = new THREE.Vector3()
-  billboardUp = new THREE.Vector3()
+  cameraToLookAt = new Vector3()
+  billboardUp = new Vector3()
   for (let i = maxItems; i--;) {
     const particle = new PostParticle({ type: 'nav', visible: true })
     particle.scale.x = particle.scale.y = particle.scale.z = 0.01

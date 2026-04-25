@@ -13,7 +13,18 @@ import { searchPostParticles } from '../scene3d/searchPostParticles.js'
 import { navPostParticles } from '../scene3d/navPostParticles.js'
 import { fakeParticles } from '../scene3d/fakeParticles.js'
 import { qs } from '../utils/dom.js'
-import * as THREE from 'three'
+import {
+  FogExp2,
+  LinearSRGBColorSpace,
+  Object3D,
+  PerspectiveCamera,
+  Raycaster,
+  Scene,
+  UnsignedByteType,
+  Vector3,
+  WebGLRenderer,
+  WebGLRenderTarget,
+} from 'three'
 import '../libs/threejs/Three.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
@@ -81,9 +92,9 @@ let renderer
 let composer
 
 // Three.js helpers
-const lookAtHelper = new THREE.Object3D()
-const mapRotationHelper = new THREE.Object3D()
-const fixedScalePoint = new THREE.Object3D()
+const lookAtHelper = new Object3D()
+const mapRotationHelper = new Object3D()
+const fixedScalePoint = new Object3D()
 
 // Camera + control state
 let wasHasControl = false
@@ -96,13 +107,13 @@ let _isKeyA = false
 let _isKeyW = false
 let isDragging
 
-// Vectors (created eagerly — THREE.Vector3 doesn't touch DOM)
-const cameraPosition = new THREE.Vector3(0, 0, 0)
-const cameraTargetPosition = new THREE.Vector3(0, 0, 0)
-const lookAtPosition = new THREE.Vector3(0, 0, 0)
-const lookAtTargetPosition = new THREE.Vector3(0, 0, 0)
-const cameraVector = new THREE.Vector3(0, 0, 0)
-const cameraPosOffset = new THREE.Vector3()
+// Vectors (created eagerly — Vector3 doesn't touch DOM)
+const cameraPosition = new Vector3(0, 0, 0)
+const cameraTargetPosition = new Vector3(0, 0, 0)
+const lookAtPosition = new Vector3(0, 0, 0)
+const lookAtTargetPosition = new Vector3(0, 0, 0)
+const cameraVector = new Vector3(0, 0, 0)
+const cameraPosOffset = new Vector3()
 
 let rotationDeltaHorizontal = 0
 let translateZDelta = 0
@@ -165,9 +176,9 @@ function init() {
   container = qs('.base-3d-container')
   containerStyle = container.style
 
-  camera = new THREE.PerspectiveCamera(100, 1, 1, 3000)
-  raycaster = new THREE.Raycaster()
-  mainScene = new THREE.Scene()
+  camera = new PerspectiveCamera(100, 1, 1, 3000)
+  raycaster = new Raycaster()
+  mainScene = new Scene()
 
   map.init()
   mainScene.add(map.particles)
@@ -176,8 +187,8 @@ function init() {
   postSubmitCircle.init()
   mainScene.add(postSubmitCircle.mesh)
 
-  particlesScene = new THREE.Scene()
-  particlesScene.fog = new THREE.FogExp2(0x070707, 0.0006)
+  particlesScene = new Scene()
+  particlesScene.fog = new FogExp2(0x070707, 0.0006)
 
   particleFields = []
   for (let i = 0, len = GRID_SEG * GRID_SEG; i < len; i += 1) {
@@ -195,14 +206,14 @@ function init() {
   searchPostParticles.init(particlesScene)
   navPostParticles.init(particlesScene)
 
-  renderer = new THREE.WebGLRenderer({
+  renderer = new WebGLRenderer({
     antialias: true,
     sortObjects: false,
   })
   // Match the original r71 rendering pipeline: shaders wrote directly to a linear
   // framebuffer without an output-side gamma encode. Modern three defaults to
   // SRGBColorSpace which adds that encode and shifts every color — pin it back.
-  renderer.outputColorSpace = THREE.LinearSRGBColorSpace
+  renderer.outputColorSpace = LinearSRGBColorSpace
   renderer.setClearColor(0x070707, 1)
   renderer.autoClear = false
 
@@ -213,11 +224,11 @@ function init() {
   // / negative — producing NaN that the GPU renders as opaque black holes
   // inside bright particle clusters. r71 used UnsignedByteType (clamped
   // to [0,1]) so the math stayed bounded.
-  const composerTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType })
+  const composerTarget = new WebGLRenderTarget(1, 1, { type: UnsignedByteType })
   composer = new EffectComposer(renderer, composerTarget)
   renderPass = new RenderPass(particlesScene, camera)
   rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
-  const saveTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType })
+  const saveTarget = new WebGLRenderTarget(1, 1, { type: UnsignedByteType })
   savePass = new SavePass(saveTarget)
   hblurPass = scene3dController.hblur = new ShaderPass(HorizontalTiltShiftShader)
   vblurPass = scene3dController.vblur = new ShaderPass(VerticalTiltShiftShader)

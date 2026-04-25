@@ -5,7 +5,7 @@ import { fakeParticles } from './fakeParticles.js'
 import { scene3dController } from '../controllers/scene3dController.js'
 import { onHidden as post2dHidden } from '../ui/post2d.js'
 import { lerp, clamp } from '../utils/native.js'
-import * as THREE from 'three'
+import { Object3D, Vector3 } from 'three'
 import '../libs/threejs/Three.js'
 import { animator } from '../animation/animator.js'
 
@@ -16,10 +16,10 @@ let isHiding = false
 let selectedParticle = null
 let cameraDistance
 let maxItems
-const previousCameraTarget = new THREE.Vector3()
-const previousLookAtTarget = new THREE.Vector3()
-const clickLookAt = new THREE.Object3D()
-const clickCamera = new THREE.Object3D()
+const previousCameraTarget = new Vector3()
+const previousLookAtTarget = new Vector3()
+const clickLookAt = new Object3D()
+const clickCamera = new Object3D()
 
 function init(scene) {
   cameraDistance = config.SCENE_CAMERA_HORIZONTAL_DISTANCE

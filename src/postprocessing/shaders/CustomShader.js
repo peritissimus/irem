@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import { evalShader } from '../../libs/threejs/Three.js'
 import vertexShaderSource from '../../shaders/custom/vertex.glsl?raw'
 import fragmentShaderSource from '../../shaders/custom/fragment.glsl?raw'
@@ -16,8 +15,8 @@ export const CustomShader = {
     opacity: { value: 1 },
     vAlpha: { value: 0.36 },
   },
-  vertexShader: evalShader(vertexShaderSource, { THREE }),
-  fragmentShader: evalShader(fragmentShaderSource, { THREE }),
+  vertexShader: evalShader(vertexShaderSource),
+  fragmentShader: evalShader(fragmentShaderSource),
 }
 
 export default CustomShader

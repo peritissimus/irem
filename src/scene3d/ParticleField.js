@@ -1,11 +1,21 @@
 import { config } from '../config.js'
-import * as THREE from 'three'
+import {
+  AdditiveBlending,
+  BufferAttribute,
+  BufferGeometry,
+  Color,
+  Points,
+  RepeatWrapping,
+  ShaderMaterial,
+  Texture,
+  Vector3,
+} from 'three'
 import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/particleWave/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/particleWave/fragment.glsl?raw'
 
-const vertexShader = evalShader(vertexShaderSource, { THREE })
-const fragmentShader = evalShader(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource)
+const fragmentShader = evalShader(fragmentShaderSource)
 
 export class ParticleField {
   constructor(amount, offsetX, offsetZ) {
@@ -17,11 +27,11 @@ export class ParticleField {
   }
 
   _createMaterial() {
-    const texture = new THREE.Texture(config.colorMap)
+    const texture = new Texture(config.colorMap)
     texture.needsUpdate = true
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+    texture.wrapS = texture.wrapT = RepeatWrapping
     this.uniforms = {
-      fogColor: { type: 'c', value: new THREE.Color(0) },
+      fogColor: { type: 'c', value: new Color(0) },
       fogDensity: { type: 'f', value: 0.025 },
       fogFar: { type: 'f', value: 2000 },
       fogNear: { type: 'f', value: 1 },
@@ -30,17 +40,17 @@ export class ParticleField {
       colorMapScale: { type: 'f', value: 1 },
       time: { type: 'f', value: 0 },
       zoom: { type: 'f', value: 0 },
-      globalPos: { type: 'v3', value: new THREE.Vector3(0, 0, 0) },
-      posOffset: { type: 'v3', value: new THREE.Vector3(this.offsetX, 0, this.offsetZ) },
-      posFieldOffset: { type: 'v3', value: new THREE.Vector3(this.offsetX, 0, this.offsetZ) },
-      cameraVector: { type: 'v3', value: new THREE.Vector3(0, 0, 0) },
+      globalPos: { type: 'v3', value: new Vector3(0, 0, 0) },
+      posOffset: { type: 'v3', value: new Vector3(this.offsetX, 0, this.offsetZ) },
+      posFieldOffset: { type: 'v3', value: new Vector3(this.offsetX, 0, this.offsetZ) },
+      cameraVector: { type: 'v3', value: new Vector3(0, 0, 0) },
       dpi: { type: 'f', value: window.devicePixelRatio || 1 },
     }
-    this.material = new THREE.ShaderMaterial({
+    this.material = new ShaderMaterial({
       uniforms: this.uniforms,
       vertexShader,
       fragmentShader,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       transparent: true,
       depthTest: false,
       fog: true,
@@ -49,7 +59,7 @@ export class ParticleField {
   }
 
   _createGeometry() {
-    const geometry = (this.geometry = new THREE.BufferGeometry())
+    const geometry = (this.geometry = new BufferGeometry())
     const segmentSize = config.PARTICLE_FIELD_SEGMENT_SIZE
     const gridSize = config.PARTICLE_FIELD_GRID_SIZE
     const spacing = gridSize / segmentSize
@@ -63,8 +73,8 @@ export class ParticleField {
         positions[i++] = z * spacing
       }
     }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    this.particles = new THREE.Points(geometry, this.material)
+    geometry.setAttribute('position', new BufferAttribute(positions, 3))
+    this.particles = new Points(geometry, this.material)
   }
 
   move(x, z) {

@@ -1,20 +1,20 @@
 import { scene3dController } from '../controllers/scene3dController.js'
 import { snoise2D } from '../utils/noiseUtils.js'
 import { clamp } from '../utils/native.js'
-import * as THREE from 'three'
+import { Mesh, PlaneGeometry, ShaderMaterial, Texture, Vector3 } from 'three'
 import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/postSubmitCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postSubmitCircle/fragment.glsl?raw'
 
-const vertexShader = evalShader(vertexShaderSource, { THREE })
-const fragmentShader = evalShader(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource)
+const fragmentShader = evalShader(fragmentShaderSource)
 const SIZE = 512
 
 let mesh
 let position
 let previousAnimation = false
-const startPosition = new THREE.Vector3(0, 0, 0)
-const deltaPosition = new THREE.Vector3(0, 0, 0)
+const startPosition = new Vector3(0, 0, 0)
+const deltaPosition = new Vector3(0, 0, 0)
 
 function clampedNorm(value, min, max) {
   return clamp((value - min) / (max - min), 0, 1)
@@ -35,11 +35,11 @@ function createMaterial() {
 
   const uniforms = (postSubmitCircle.uniforms = {
     time: { type: 'f', value: 0 },
-    tex: { type: 't', value: new THREE.Texture(canvas) },
+    tex: { type: 't', value: new Texture(canvas) },
     animation: { type: 'f', value: 0 },
     fade: { type: 'f', value: 0 },
   })
-  postSubmitCircle.material = new THREE.ShaderMaterial({
+  postSubmitCircle.material = new ShaderMaterial({
     uniforms,
     vertexShader,
     fragmentShader,
@@ -51,8 +51,8 @@ function createMaterial() {
 }
 
 function createMesh() {
-  postSubmitCircle.geometry = new THREE.PlaneGeometry(SIZE, SIZE)
-  mesh = postSubmitCircle.mesh = new THREE.Mesh(postSubmitCircle.geometry, postSubmitCircle.material)
+  postSubmitCircle.geometry = new PlaneGeometry(SIZE, SIZE)
+  mesh = postSubmitCircle.mesh = new Mesh(postSubmitCircle.geometry, postSubmitCircle.material)
   position = mesh.position
 }
 

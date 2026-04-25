@@ -1,15 +1,14 @@
 import { config } from '../config.js'
 import { uiController } from '../controllers/uiController.js'
-import { evalReplace } from '../utils/stringUtils.js'
 import { mixIn } from '../utils/native.js'
-import * as THREE from 'three'
-import '../libs/threejs/Three.js'
+import { Color, Mesh, PlaneGeometry, ShaderMaterial, Texture } from 'three'
+import { evalShader } from '../libs/threejs/Three.js'
 import { animator } from '../animation/animator.js'
 import vertexShaderSource from '../shaders/postParticle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/postParticle/fragment.glsl?raw'
 
-const vertexShader = evalReplace(vertexShaderSource, { THREE })
-const fragmentShader = evalReplace(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource)
+const fragmentShader = evalShader(fragmentShaderSource)
 let blankCanvas = null
 
 function getSize() {
@@ -29,16 +28,16 @@ function getBlankCanvas() {
   return blankCanvas
 }
 
-export class PostParticle extends THREE.Mesh {
+export class PostParticle extends Mesh {
   constructor(options) {
     const size = getSize()
     const blank = getBlankCanvas()
     const uniforms = {
-      fogColor: { type: 'c', value: new THREE.Color(0) },
+      fogColor: { type: 'c', value: new Color(0) },
       fogDensity: { type: 'f', value: 0.025 },
       fogFar: { type: 'f', value: 2000 },
       fogNear: { type: 'f', value: 1 },
-      tex: { type: 't', value: new THREE.Texture(blank) },
+      tex: { type: 't', value: new Texture(blank) },
       u_time: { type: 'f', value: Math.random() * 100 },
       alpha: { type: 'f', value: 1 },
       fade: { type: 'f', value: 0 },
@@ -47,8 +46,8 @@ export class PostParticle extends THREE.Mesh {
       showScale: { type: 'f', value: 1 },
     }
     super(
-      new THREE.PlaneGeometry(size, size, 1, 1),
-      new THREE.ShaderMaterial({
+      new PlaneGeometry(size, size, 1, 1),
+      new ShaderMaterial({
         uniforms,
         vertexShader,
         fragmentShader,

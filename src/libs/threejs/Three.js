@@ -1,11 +1,9 @@
 // Side-effect module: configures THREE.ShaderChunk with our custom chunks
-// (snoise2d, fog overrides) and exposes a window.THREE alias for legacy code.
-// Consumers should import THREE directly: `import * as THREE from 'three'`.
-// They can pull `evalShader` from this module when they need the GLSL
-// ShaderChunk macro processor.
+// (snoise2d, fog overrides) so the EVAL macros in our GLSL files resolve
+// correctly. Consumers should import THREE symbols by name.
+// `evalShader` is exposed for callers that need the GLSL macro processor.
 
 import { ShaderChunk } from 'three'
-import * as THREE from 'three'
 import snoise2dShader from '../../shaders/noises/snoise2d.glsl?raw'
 import { evalReplace } from '../../utils/stringUtils.js'
 
@@ -35,8 +33,9 @@ ShaderChunk.fog_fragment = [
   '#endif',
 ].join('\n')
 
-export const evalShader = (source, scopeVariables) => evalReplace(source, scopeVariables)
-
-if (typeof window !== 'undefined') {
-  window.THREE = THREE
-}
+// EVAL macros in our GLSL only ever read THREE.ShaderChunk (verified via
+// grep across src/shaders/). Provide that scope automatically so callers
+// don't have to import * as THREE just to pass it through — keeping the
+// THREE namespace out of consumer files unlocks tree-shaking.
+const macroScope = { THREE: { ShaderChunk } }
+export const evalShader = (source) => evalReplace(source, macroScope)

@@ -1,11 +1,18 @@
 import { config } from '../config.js'
-import * as THREE from 'three'
+import {
+  AdditiveBlending,
+  BufferAttribute,
+  BufferGeometry,
+  Points,
+  ShaderMaterial,
+  Vector4,
+} from 'three'
 import { evalShader } from '../libs/threejs/Three.js'
 import vertexShaderSource from '../shaders/stepCircle/vertex.glsl?raw'
 import fragmentShaderSource from '../shaders/stepCircle/fragment.glsl?raw'
 
-const vertexShader = evalShader(vertexShaderSource, { THREE })
-const fragmentShader = evalShader(fragmentShaderSource, { THREE })
+const vertexShader = evalShader(vertexShaderSource)
+const fragmentShader = evalShader(fragmentShaderSource)
 
 function init() {
   createMaterial()
@@ -22,21 +29,21 @@ function createMaterial() {
     opacity: { type: 'f', value: 1 },
     fading: { type: 'f', value: 0 },
     dpi: { type: 'f', value: window.devicePixelRatio || 1 },
-    stepTimes: { type: 'v4', value: new THREE.Vector4(0, 0, 0, 0) },
-    stepExtraTimes: { type: 'v4', value: new THREE.Vector4(0, 0, 0, 0) },
+    stepTimes: { type: 'v4', value: new Vector4(0, 0, 0, 0) },
+    stepExtraTimes: { type: 'v4', value: new Vector4(0, 0, 0, 0) },
   }
-  stepCircle.material = new THREE.ShaderMaterial({
+  stepCircle.material = new ShaderMaterial({
     uniforms: stepCircle.uniforms,
     vertexShader,
     fragmentShader,
-    blending: THREE.AdditiveBlending,
+    blending: AdditiveBlending,
     transparent: true,
     depthTest: false,
   })
 }
 
 function createGeometry() {
-  const geometry = (stepCircle.geometry = new THREE.BufferGeometry())
+  const geometry = (stepCircle.geometry = new BufferGeometry())
   const amountPerDegree = config.STEP_CIRCLE_PARTICLE_AMOUNT_PER_DEGREE
   const amount = amountPerDegree * 360
   const positions = new Float32Array(amount * 3)
@@ -49,8 +56,8 @@ function createGeometry() {
     positions[i * 3 + 2] = 0
   }
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  stepCircle.particles = new THREE.Points(geometry, stepCircle.material)
+  geometry.setAttribute('position', new BufferAttribute(positions, 3))
+  stepCircle.particles = new Points(geometry, stepCircle.material)
 }
 
 function updateStepTimes() {
