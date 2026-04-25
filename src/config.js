@@ -12,8 +12,10 @@ export function initConfig() {
 
   config.POST_ID_OFFSET = 1248
 
-  config.BASE_URL = rtrim(qs('base').getAttribute('href'), ['/'])
-  config.SITE_URL = config.BASE_URL + (config.LANG === 'fr' ? '' : `/${config.LANG}`)
+  config.BASE_URL = import.meta.env.DEV
+    ? window.location.origin
+    : rtrim(qs('base').getAttribute('href'), ['/'])
+  config.SITE_URL = config.BASE_URL
 
   config.settings = window.SETTINGS
   config.ERROR_MESSAGES = window.ERROR_MESSAGES
