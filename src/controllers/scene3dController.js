@@ -258,9 +258,29 @@ function init() {
   initDevGUI()
 }
 
-function initDevGUI() {
-  if (!config.IS_DEV || !window.dat?.GUI) return
-  const gui = new window.dat.GUI()
+async function initDevGUI() {
+  if (!config.IS_DEV) return
+  const { GUI } = await import('lil-gui')
+  const gui = new GUI({ title: 'irem dev' })
+
+  const noise = gui.addFolder('noise / post')
+  noise.add(customShaderPass.uniforms.alpha, 'value', 0, 0.5, 0.001).name('grain alpha')
+  noise.add(customShaderPass, 'noiseSpeed', 0, 5, 0.01).name('grain speed')
+  noise.add(customShaderPass.uniforms.opacity, 'value', 0, 1, 0.01).name('scene opacity')
+  noise.add(customShaderPass.uniforms.gradientOpacity, 'value', 0, 1, 0.01).name('gradient')
+  noise.add(customShaderPass.uniforms.vRadius, 'value', 0, 2, 0.01).name('vignette radius')
+  noise.add(customShaderPass.uniforms.vSoftness, 'value', 0, 2, 0.01).name('vignette soft')
+  noise.add(customShaderPass.uniforms.vAlpha, 'value', 0, 1, 0.01).name('vignette alpha')
+  noise.add(rgbShiftPass.uniforms.amount, 'value', 0, 0.01, 0.0001).name('rgb shift')
+  noise.add(scene3dController, 'blurriness', 0, 5, 0.01).name('blur')
+
+  const fp = gui.addFolder('fakeParticles')
+  fp.add(fakeParticles, 'fade', 0, 1).name('fade')
+  fp.add(fakeParticles, 'time', 0, 1).name('time')
+  fp.add(fakeParticles.uniforms.skip, 'value', 1, 1000).name('skip')
+  fp.add(fakeParticles.uniforms.amount, 'value', 1, 60000).name('amount')
+  fp.add(fakeParticles.uniforms.heightPower, 'value', 0.5, 1.8).name('heightPower')
+
   const actions = {
     play() {
       const vector = cameraVector.clone().normalize()
@@ -276,14 +296,8 @@ function initDevGUI() {
       animator.to(fakeParticles, { duration: 0.5, fade: 1, ease: 'none' })
     },
   }
-  const folder = gui.addFolder('fakeParticles')
-  folder.add(fakeParticles, 'fade', 0, 1).name('fade')
-  folder.add(fakeParticles, 'time', 0, 1).name('time')
-  folder.add(fakeParticles.uniforms.skip, 'value', 1, 1000).name('skip')
-  folder.add(fakeParticles.uniforms.amount, 'value', 1, 60000).name('amount')
-  folder.add(fakeParticles.uniforms.heightPower, 'value', 0.5, 1.8).name('heightPower')
-  folder.add(actions, 'play').name('play')
-  folder.open()
+  fp.add(actions, 'play').name('play')
+  fp.close()
 }
 
 function onKeyboard(event) {
