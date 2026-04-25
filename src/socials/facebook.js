@@ -1,4 +1,5 @@
 import signals from '../events/signal.js'
+import { config } from '../config.js'
 import { jsonp } from '../utils/jsonp.js'
 
 // NOTE: original deps included `config` (never referenced in the body — dropped),
@@ -27,7 +28,7 @@ function init() {
   if (window.__DISABLE_ARCHIVE_SOCIALS__) return
 
   window.fbAsyncInit = function () {
-    FB.init({ appId: FACEBOOK_ID, status: true, xfbml: true })
+    FB.init({ appId: config.FACEBOOK_ID, status: true, xfbml: true })
     isFBInitialized = true
     FB.getLoginStatus((response) => {
       if (response.authResponse) {

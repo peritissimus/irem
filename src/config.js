@@ -17,6 +17,12 @@ export function initConfig() {
 
   config.settings = window.SETTINGS
   config.ERROR_MESSAGES = window.ERROR_MESSAGES
+  config.SITE_DESCRIPTION = window.SITE_DESCRIPTION
+  config.TWITTER_SITE_DESCRIPTION = window.TWITTER_SITE_DESCRIPTION
+  config.POST_DESCRIPTION = window.POST_DESCRIPTION
+  config.TWITTER_POST_DESCRIPTION = window.TWITTER_POST_DESCRIPTION
+  config.INSTAGRAM_ID = window.INSTAGRAM_ID
+  config.FACEBOOK_ID = window.FACEBOOK_ID
 
   config.SKIP_PRELOADER = config.IS_DEV
   config.SKIP_ADJUSTMENT_TUTORIALS = config.IS_DEV

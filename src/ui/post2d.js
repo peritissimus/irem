@@ -90,7 +90,7 @@ function preShow(post) {
   preShowPost = post
   const imgUrl =
     window.__STATIC_POST_IMAGE ||
-    window.__UPLOADS_ROOT + 'posts/' + post.img + '/resized.jpg'
+    config.UPLOADS_FOLDER + 'posts/' + post.img + '/resized.jpg'
 
   imgEl.style.backgroundImage = 'none'
   imgEl.style.backgroundImage = `url(${imgUrl})`

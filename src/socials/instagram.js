@@ -30,7 +30,7 @@ function login() {
     `${config.BASE_URL}/api/instagram-token-callback`,
   )
   window.open(
-    `https://web.archive.org/web/20140806221657/https://api.instagram.com/oauth/authorize/?client_id=${window.INSTAGRAM_ID}&redirect_uri=${redirect}&response_type=token`,
+    `https://web.archive.org/web/20140806221657/https://api.instagram.com/oauth/authorize/?client_id=${config.INSTAGRAM_ID}&redirect_uri=${redirect}&response_type=token`,
     '_blank',
     'toolbar=no,scrollbars=no,resizable=yes,width=800,height=540',
   )

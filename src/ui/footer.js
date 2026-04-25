@@ -86,7 +86,7 @@ function onShareClick() {
   socialShare(
     type,
     '',
-    type === 'twitter' ? window.TWITTER_SITE_DESCRIPTION : window.SITE_DESCRIPTION,
+    type === 'twitter' ? config.TWITTER_SITE_DESCRIPTION : config.SITE_DESCRIPTION,
   )
 }
 

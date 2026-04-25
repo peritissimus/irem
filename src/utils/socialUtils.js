@@ -34,7 +34,7 @@ export function parseLinks(text) {
 
 export function getFacebookShareLink(url) {
   return (
-    `https://www.facebook.com/dialog/feed?app_id=${FACEBOOK_ID}` +
+    `https://www.facebook.com/dialog/feed?app_id=${config.FACEBOOK_ID}` +
     `&link=${encodeURIComponent(url)}` +
     `&redirect_uri=${encodeURIComponent(config.BASE_URL)}/close.html`
   )

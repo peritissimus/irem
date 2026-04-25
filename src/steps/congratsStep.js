@@ -43,7 +43,7 @@ function onShareClick() {
   socialShare(
     type,
     '/memory/' + (parseInt(stepController.data.id, 10) + config.POST_ID_OFFSET),
-    type === 'twitter' ? window.TWITTER_POST_DESCRIPTION : window.POST_DESCRIPTION,
+    type === 'twitter' ? config.TWITTER_POST_DESCRIPTION : config.POST_DESCRIPTION,
   )
 }
 
