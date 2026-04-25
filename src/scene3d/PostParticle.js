@@ -58,6 +58,13 @@ export class PostParticle extends THREE.Mesh {
         fog: true,
       }),
     )
+    // Modern Three's frustum culling tests the geometry's bounding sphere
+    // against the camera frustum after applying the mesh's matrixWorld.
+    // Our PostParticles billboard via lookAt() and use a per-frame scale
+    // tied to camera distance, which makes the bounding-sphere math fight
+    // with quick camera rotations — particles flicker out mid-navigation.
+    // The pool is fixed-size so skipping culling costs nothing.
+    this.frustumCulled = false
     mixIn(
       this,
       {
