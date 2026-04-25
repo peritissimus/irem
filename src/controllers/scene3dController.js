@@ -196,9 +196,12 @@ function init() {
 
   renderer = new THREE.WebGLRenderer({
     antialias: true,
-    targetHorizontalRotation: true,
     sortObjects: false,
   })
+  // Match the original r71 rendering pipeline: shaders wrote directly to a linear
+  // framebuffer without an output-side gamma encode. Modern three defaults to
+  // SRGBColorSpace which adds that encode and shifts every color — pin it back.
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace
   renderer.setClearColor(0x070707, 1)
   renderer.autoClear = false
 
