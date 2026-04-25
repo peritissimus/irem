@@ -206,15 +206,17 @@ function init() {
   renderer.setClearColor(0x070707, 1)
   renderer.autoClear = false
 
-  composer = new EffectComposer(renderer)
+  // BOTH the EffectComposer's active buffer AND the SavePass buffer must
+  // be UnsignedByteType. Modern jsm defaults both to HalfFloatType, so
+  // additive-blended bright pixels exceed 1.0 in those buffers, and the
+  // BlendShader's `center / (1 - sum)` (color-dodge) hits divide-by-zero
+  // / negative — producing NaN that the GPU renders as opaque black holes
+  // inside bright particle clusters. r71 used UnsignedByteType (clamped
+  // to [0,1]) so the math stayed bounded.
+  const composerTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType })
+  composer = new EffectComposer(renderer, composerTarget)
   renderPass = new RenderPass(particlesScene, camera)
   rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
-  // BlendShader does `center / (1 - sum)` (color-dodge). The default jsm
-  // SavePass uses HalfFloatType, so additive-blended bright pixels exceed
-  // 1.0 and the divisor can hit zero / produce NaN — which renders as
-  // opaque black holes in the center of bright particle clusters. Force
-  // UnsignedByteType so values clamp to [0,1] before the blend math runs,
-  // matching the r71 pipeline.
   const saveTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType })
   savePass = new SavePass(saveTarget)
   hblurPass = scene3dController.hblur = new ShaderPass(HorizontalTiltShiftShader)
