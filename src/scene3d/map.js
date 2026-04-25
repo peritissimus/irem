@@ -31,7 +31,11 @@ function createMaterial() {
 }
 
 function createGeometry() {
-  map.geometry = new THREE.OctahedronGeometry(45, 8)
+  // detail 12 ≈ 4,056 verts in modern three's deduped BufferGeometry —
+  // matches the ~4,098 particle count r71 produced at detail 5 (it did
+  // not share vertices across faces, so the same param meant a denser
+  // point cloud).
+  map.geometry = new THREE.OctahedronGeometry(45, 12)
   map.particles = new THREE.Points(map.geometry, map.material)
 }
 
