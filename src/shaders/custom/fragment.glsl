@@ -23,8 +23,10 @@ void main() {
 
     color.rgb = mix(color.rgb, vec3(.043, .043, .043), 1.0 - opacity);
 
+    // Additive grain centered on zero — preserves underlying color (and the
+    // glow halos from the blend pass) instead of replacing it with gray.
     float r = rand(gl_FragCoord.xy + rand(gl_FragCoord.yx + time));
-    color.rgb = mix(color.rgb, vec3(r, r, r), alpha);
+    color.rgb += (r - 0.5) * alpha;
 
     // radial gradient
     // float distanceToGradientCenter = clamp(length((vUv - vec2(.5, .5 + zoom + .5)) * 2.0), 0., 1.);
