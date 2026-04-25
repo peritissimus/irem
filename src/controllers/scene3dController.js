@@ -524,6 +524,9 @@ function render() {
 
     let hit
     for (let i = 0, len = candidates.length; i < len; i += 1) {
+      // Modern Three's Raycaster.intersectObject doesn't skip invisible meshes
+      // (r71 did). Skip pooled-but-not-yet-positioned PostParticles explicitly.
+      if (!candidates[i].visible) continue
       hit = raycaster.intersectObject(candidates[i])[0]
       if (hit) break
     }
