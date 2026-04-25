@@ -353,7 +353,7 @@ function onUp(event) {
   }
 
   if (scene3dController.canInteractiveWithPost) {
-    if (event.isDoubleClick || (event.isClick && hoveredInteractivePost)) {
+    if (hoveredInteractivePost && (event.isDoubleClick || event.isClick)) {
       hoveredInteractivePost.onOut()
       hoveredInteractivePost.onClick()
       hoveredInteractivePost = null
