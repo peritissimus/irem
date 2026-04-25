@@ -808,7 +808,7 @@ export const scene3dController = {
   cameraFov: 0,
   cameraSwingSpeed: 0.015,
   cameraSwingRadius: 0.6,
-  blurriness: 1.4,
+  blurriness: 2.2,
   blurBlendRatio: 1,
   fixedScalePointLength: 0,
   fixedScalePoint,
