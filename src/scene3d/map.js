@@ -31,7 +31,7 @@ function createMaterial() {
 }
 
 function createGeometry() {
-  map.geometry = new THREE.OctahedronGeometry(45, 5)
+  map.geometry = new THREE.OctahedronGeometry(45, 8)
   map.particles = new THREE.Points(map.geometry, map.material)
 }
 
