@@ -3,7 +3,7 @@ import path from 'node:path'
 import { Parser } from 'acorn'
 
 const root = process.cwd()
-const entrypoints = ['index.html', 'en.html']
+const entrypoints = ['index.html']
 const requiredGlobals = [
   'LANG',
   'ENV_ID',
@@ -120,12 +120,6 @@ for (const entrypoint of entrypoints) {
       failures.push(`${entrypoint}: missing required global ${name}`)
     }
   }
-}
-
-const indexHtml = htmlByEntrypoint.get('index.html')
-const enHtml = htmlByEntrypoint.get('en.html')
-if (indexHtml && enHtml && indexHtml !== enHtml) {
-  failures.push('index.html and en.html differ')
 }
 
 console.log(`Checked ${htmlByEntrypoint.size} HTML entrypoint(s)`)
