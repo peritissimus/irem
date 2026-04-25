@@ -23,10 +23,15 @@ void main() {
 
     color.rgb = mix(color.rgb, vec3(.043, .043, .043), 1.0 - opacity);
 
-    // Additive grain centered on zero — preserves underlying color (and the
-    // glow halos from the blend pass) instead of replacing it with gray.
+    // Luminance-weighted additive grain. Same scalar added to R/G/B
+    // (so no hue shift), but scaled by perceived brightness so dark
+    // pixels don't get dominated by noise (which the RGBShift pass
+    // would then fringe into colour artefacts on the glow halos).
+    // Floor of 0.15 keeps a faint base grain in shadows; the rest
+    // ramps with luminance so brights get a richer film texture.
     float r = rand(gl_FragCoord.xy + rand(gl_FragCoord.yx + time));
-    color.rgb += (r - 0.5) * alpha;
+    float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    color.rgb += (r - 0.5) * alpha * (0.15 + 0.85 * lum);
 
     // radial gradient
     // float distanceToGradientCenter = clamp(length((vUv - vec2(.5, .5 + zoom + .5)) * 2.0), 0., 1.);
