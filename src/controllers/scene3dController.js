@@ -215,7 +215,7 @@ function init() {
   blurBlendPass = scene3dController.blurBlend = new ShaderPass(BlendShader)
   blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget.texture
   customShaderPass = scene3dController.customShader = new ShaderPass(CustomShader)
-  customShaderPass.noiseSpeed = 0
+  customShaderPass.noiseSpeed = 1
 
   composer.addPass(renderPass)
   composer.addPass(savePass)
