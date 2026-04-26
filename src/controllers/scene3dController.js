@@ -102,12 +102,9 @@ const fixedScalePoint = new Object3D()
 let wasHasControl = false
 let pixelToUnitRatio = 1
 
-// Keyboard WASD state (not used in the default build but preserved)
-let _isKeyD = false
-let _isKeyS = false
-let _isKeyA = false
-let _isKeyW = false
 let isDragging
+const MOVEMENT_EASE = 0.1
+const ZOOM_SPEED = 0.1
 
 // Vectors (created eagerly — Vector3 doesn't touch DOM)
 const cameraPosition = new Vector3(0, 0, 0)
@@ -122,6 +119,7 @@ let translateZDelta = 0
 let translateXDelta = 0
 
 let particleFields = []
+const CAMERA_SWING_SPEED = 0.015
 let cameraSwingTime = 0
 
 // Shader passes (assigned in init)
@@ -146,9 +144,6 @@ let prevCameraZ
 let prevLookAtX
 let prevLookAtZ
 
-let distanceWalked = 0 // eslint-disable-line no-unused-vars
-let lastFrameTime = 0
-
 function init() {
   FOV_MIN = config.SCENE_3D_FOV_MIN
   FOV_MAX = config.SCENE_3D_FOV_MAX
@@ -168,14 +163,6 @@ function init() {
   prevCameraZ = cameraPosition.z
   prevLookAtX = lookAtPosition.x
   prevLookAtZ = lookAtPosition.z
-
-  scene3dController.cameraPosition = cameraPosition
-  scene3dController.cameraTargetPosition = cameraTargetPosition
-  scene3dController.lookAtPosition = lookAtPosition
-  scene3dController.lookAtTargetPosition = lookAtTargetPosition
-  scene3dController.cameraVector = cameraVector
-  scene3dController.cameraPosOffset = cameraPosOffset
-  scene3dController.fixedScalePoint = fixedScalePoint
 
   container = qs('.base-3d-container')
   containerStyle = container.style
@@ -239,14 +226,14 @@ function init() {
     depthTexture: new DepthTexture(1, 1, UnsignedShortType),
   })
   texturePass = new TexturePass(particleSceneTarget.texture)
-  atmosphericFogPass = scene3dController.atmosphericFog = new ShaderPass(AtmosphericFogShader)
+  atmosphericFogPass = new ShaderPass(AtmosphericFogShader)
   atmosphericFogPass.uniforms.tDepth.value = particleSceneTarget.depthTexture
-  rgbShiftPass = scene3dController.rgbShift = new ShaderPass(RGBShiftShader)
+  rgbShiftPass = new ShaderPass(RGBShiftShader)
   const saveTarget = new WebGLRenderTarget(1, 1, { type: UnsignedByteType })
   savePass = new SavePass(saveTarget)
-  hblurPass = scene3dController.hblur = new ShaderPass(HorizontalTiltShiftShader)
-  vblurPass = scene3dController.vblur = new ShaderPass(VerticalTiltShiftShader)
-  blurBlendPass = scene3dController.blurBlend = new ShaderPass(BlendShader)
+  hblurPass = new ShaderPass(HorizontalTiltShiftShader)
+  vblurPass = new ShaderPass(VerticalTiltShiftShader)
+  blurBlendPass = new ShaderPass(BlendShader)
   blurBlendPass.uniforms.tDiffuse2.value = savePass.renderTarget.texture
   customShaderPass = scene3dController.customShader = new ShaderPass(CustomShader)
   customShaderPass.noiseSpeed = 1
@@ -275,9 +262,6 @@ function init() {
   inputController.onMove.add(onMove)
   inputController.onUp.add(onUp)
   inputController.add(container, 'wheel', onWheel)
-
-  window.addEventListener('keydown', onKeyboard)
-  window.addEventListener('keyup', onKeyboard)
 
   stageReference.onResize.add(onResize)
   stageReference.onRender.add(render)
@@ -343,25 +327,6 @@ async function initDevGUI() {
   }
   fp.add(actions, 'play').name('play')
   fp.close()
-}
-
-function onKeyboard(event) {
-  const pressed = event.type.indexOf('down') > -1
-  if (!scene3dController.hasControl && pressed) return
-  switch (event.keyCode) {
-    case 68:
-      _isKeyD = pressed
-      break
-    case 83:
-      _isKeyS = pressed
-      break
-    case 65:
-      _isKeyA = pressed
-      break
-    case 87:
-      _isKeyW = pressed
-      break
-  }
 }
 
 function onDown() {
@@ -446,16 +411,14 @@ function hypot(x, y) {
 }
 
 function render() {
-  const now = +new Date()
-  const dtMs = now - lastFrameTime // eslint-disable-line no-unused-vars
-  const ease = scene3dController.movementEase
+  const ease = MOVEMENT_EASE
 
   scene3dController.zoom +=
-    (scene3dController.targetZoom - scene3dController.zoom) * scene3dController.zoomSpeed
+    (scene3dController.targetZoom - scene3dController.zoom) * ZOOM_SPEED
   const zoom = scene3dController.zoom
   uiController.scaleMapBtn(1 + zoom)
 
-  scene3dController.cameraFov = camera.fov = lerp(zoom, FOV_MAX, FOV_MIN)
+  camera.fov = lerp(zoom, FOV_MAX, FOV_MIN)
   camera.updateProjectionMatrix()
 
   let horizRotationApplied
@@ -473,7 +436,6 @@ function render() {
     let angle = horizontalAngle()
     horizRotationApplied = rotationDeltaHorizontal * 0.1
     rotationDeltaHorizontal -= horizRotationApplied
-    distanceWalked += Math.abs(rotationDeltaHorizontal * 5)
 
     cameraTargetPosition.x = lookAtTargetPosition.x - Math.sin(angle) * radius
     cameraTargetPosition.y =
@@ -517,7 +479,6 @@ function render() {
     camera.translateZ(translateZApplied)
     camera.position.y += Math.abs(translateZApplied) * 0.3
     camera.translateX(translateXApplied)
-    distanceWalked += Math.abs(translateZApplied)
 
     const cameraShift = {
       x: camera.position.x - cameraPosition.x,
@@ -533,7 +494,7 @@ function render() {
 
   lookAtHelper.lookAt(camera.position)
 
-  cameraSwingTime += scene3dController.cameraSwingSpeed
+  cameraSwingTime += CAMERA_SWING_SPEED
   const swingRadius = scene3dController.cameraSwingRadius
   camera.translateX(Math.sin(cameraSwingTime) * swingRadius * (1 - zoom))
   camera.translateY((Math.sin(cameraSwingTime * 2) * swingRadius) / 2)
@@ -705,8 +666,6 @@ function render() {
 
   cameraPosition.sub(cameraPosOffset)
   camera.position.sub(cameraPosOffset)
-
-  lastFrameTime = now
 }
 
 function showMap() {
@@ -835,28 +794,26 @@ function resetCamera(opts) {
   )
 }
 
-function enableControl(canInteract) {
+function enableControl(canInteract = true) {
   scene3dController.hasControl = true
-  scene3dController.canInteractiveWithPost =
-    canInteract === undefined ? true : canInteract
+  scene3dController.canInteractiveWithPost = canInteract
   animator.killTweensOf(scene3dController)
   animator.killTweensOf(cameraTargetPosition)
   animator.killTweensOf(lookAtTargetPosition)
   tutorialController.show()
 }
 
-function disableControl(canInteract) {
+function disableControl(canInteract = false) {
   animator.killTweensOf(scene3dController)
   animator.killTweensOf(cameraTargetPosition)
   animator.killTweensOf(lookAtTargetPosition)
   scene3dController.hasControl = false
-  scene3dController.canInteractiveWithPost =
-    canInteract === undefined ? false : canInteract
+  scene3dController.canInteractiveWithPost = canInteract
   tutorialController.hide()
 }
 
-function updateFading(value) {
-  const ratio = (value === undefined ? config.settings.fading : value) / 100
+function updateFading(value = config.settings.fading) {
+  const ratio = value / 100
   customShaderPass.uniforms.opacity.value = ratio
   map.uniforms.fading.value = ratio
 }
@@ -864,33 +821,21 @@ function updateFading(value) {
 export const scene3dController = {
   hasControl: false,
   canInteractiveWithPost: false,
-  isActive: true,
-  movementEase: 0.1,
   lookAtHorizontalAngle: 0,
-  zoomSpeed: 0.1,
   zoom: 0,
   targetZoom: 0,
-  cameraFov: 0,
-  cameraSwingSpeed: 0.015,
   cameraSwingRadius: 0.6,
   blurriness: 1.0,
   blurBlendRatio: 1,
   fixedScalePointLength: 0,
-  fixedScalePoint,
   cameraPosition,
   cameraTargetPosition,
   lookAtPosition,
   lookAtTargetPosition,
   cameraVector,
   cameraPosOffset,
-  hblur: null,
-  vblur: null,
-  blurBlend: null,
-  rgbShift: null,
   customShader: null,
-  atmosphericFog: null,
   init,
-  render,
   showMap,
   hideMap,
   showSearchedPosts,

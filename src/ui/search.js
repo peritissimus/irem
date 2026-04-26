@@ -18,13 +18,7 @@ import {
 import { jsonp } from '../utils/jsonp.js'
 
 const BASE_FONT_SIZE = 100
-
-// NOTE: original declared `var c` in the factory body but never assigned it.
-//       It is referenced by `hide()` and `onAutoCompleteSuccess()` purely as an
-//       implicit `undefined` sentinel — the comparisons `e === c` and
-//       `S.length === c` are intentionally-or-accidentally always falsy when
-//       lengths are involved. Preserved verbatim via `UNDECLARED_C`.
-const UNDECLARED_C = undefined
+const EMPTY_MARKER = '\u200b'
 
 let container
 let centerWrapper
@@ -38,12 +32,9 @@ let searchBtn
 let notFoundEl
 let notFoundTemplate
 let lastSearchedTag
-let emptyMarker
 
 function preInit() {
   container = qs('.search')
-  // matches original: T = $('<p>&#8203;</p>').text() — the zero-width space char
-  emptyMarker = '\u200b'
   preloaderController.add(withDescendants(container))
 }
 
@@ -76,7 +67,6 @@ function initEvents() {
   inputController.add(searchBtn, 'click', onSearchBtnClick)
   postController.onPostSearchBegan.add(onPostSearchBegan)
   postController.onPostsSearched.add(onPostsSearched)
-  postController.onPostsSearchErrored.add(onPostsSearchErrored)
 }
 
 function onSearchBtnClick() {
@@ -100,7 +90,7 @@ function onInputWrapperClick() {
   if (!container.classList.contains('not-found')) return
   uiController.hideNavSearchItem()
   toggleClass(container, 'not-found', false)
-  setText(inputEl, emptyMarker)
+  setText(inputEl, EMPTY_MARKER)
   inputEl.focus()
   moveCaretToEnd(inputEl)
 }
@@ -119,10 +109,6 @@ function onPostsSearched(result) {
     })
     toggleClass(container, 'not-found', !result.all.length)
   }
-}
-
-function onPostsSearchErrored(_error) {
-  // intentionally empty in original
 }
 
 function show() {
@@ -163,10 +149,7 @@ function show() {
   inputEl.focus()
 }
 
-function hide(duration) {
-  // Original: `e = e === c ? .5 : e` where `c` is undefined — so this
-  // collapses to "default to 0.5 if no arg passed". Preserved literally.
-  duration = duration === UNDECLARED_C ? 0.5 : duration
+function hide(duration = 0.5) {
   animator.killTweensOf(container, 'opacity')
   animator.to(container, { duration, opacity: 0, ease: 'none' })
   // NOTE: original `scale3d(.85, .85, 1)` leaves Z at identity; migrated to
@@ -191,15 +174,6 @@ function onBlur() {
     trimmed.length > 0 && trimmed !== ' ' ? 'hidden' : 'visible'
 }
 
-// NOTE: defined in original but never invoked — preserved
-function selectAll(node) { // eslint-disable-line no-unused-vars
-  const range = document.createRange()
-  range.selectNodeContents(node)
-  const selection = window.getSelection()
-  selection.removeAllRanges()
-  selection.addRange(range)
-}
-
 function moveCaretToEnd(node) {
   if (
     typeof window.getSelection !== 'undefined' &&
@@ -222,7 +196,7 @@ function moveCaretToEnd(node) {
 function onFocus() {
   const text = inputEl.textContent
   if (text === '' || text === ' ') {
-    setText(inputEl, emptyMarker)
+    setText(inputEl, EMPTY_MARKER)
     moveCaretToEnd(inputEl)
   }
 }
@@ -234,7 +208,7 @@ function onInput(event) {
   }
   const html = inputEl.innerHTML
   const text = inputEl.textContent
-  if (html.indexOf('<br>') > -1) {
+  if (html.includes('<br>')) {
     inputEl.innerHTML = text.replace('<br>', '')
     moveCaretToEnd(inputEl)
     return
@@ -244,7 +218,7 @@ function onInput(event) {
   let normalized = text
     .replace(' ', '-')
     .replace(/[-!$%^&*()_+|~=`{}[\]:";'<>?,./]/g, '-')
-  normalized = normalized.replace(emptyMarker, '-')
+  normalized = normalized.replace(EMPTY_MARKER, '-')
   normalized = normalized.replace(/\s+/g, '-')
   normalized = normalized.replace('--', '-')
 
@@ -293,11 +267,11 @@ function onInput(event) {
     moveCaretToEnd(inputEl)
   }
   if (normalized === '') {
-    setText(inputEl, emptyMarker)
+    setText(inputEl, EMPTY_MARKER)
     moveCaretToEnd(inputEl)
   }
-  if (normalized.length > 1 && normalized.substr(0, 1) === '-') {
-    setText(inputEl, normalized.substr(1))
+  if (normalized.length > 1 && normalized.startsWith('-')) {
+    setText(inputEl, normalized.slice(1))
     moveCaretToEnd(inputEl)
   }
   placeholderEl.style.visibility =
@@ -309,10 +283,7 @@ function onAutoCompleteError(error) {
 }
 
 function onAutoCompleteSuccess(response) {
-  // NOTE: original guard `S.length === c` compares a number to undefined —
-  //       always false. Effectively only the `S.length < 3` branch can fire.
-  //       Preserved literally.
-  if (lastSearchedTag.length === UNDECLARED_C || lastSearchedTag.length < 3) {
+  if (lastSearchedTag.length < 3) {
     setHintDisplay('none')
     return
   }
@@ -325,7 +296,7 @@ function onAutoCompleteSuccess(response) {
         const tag = list[i]
         if (tag) {
           hint._tag = tag
-          hint.innerHTML = lastSearchedTag + tag.substr(offset)
+          hint.innerHTML = lastSearchedTag + tag.slice(offset)
         }
         hint.style.display = tag ? 'inline' : 'none'
       })
@@ -348,9 +319,6 @@ function setHintDisplay(display) {
 }
 
 export const search = {
-  get container() {
-    return container
-  },
   preInit,
   init,
   show,

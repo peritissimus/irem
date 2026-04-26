@@ -4,10 +4,6 @@ import { stageReference } from '../stageReference.js'
 import { animator } from '../animation/animator.js'
 import { hide as hideElement, qs, show as showElement } from '../utils/dom.js'
 
-// NOTE: original imported `mout/math/norm` which throws outside [min, max]
-// (differs from the archived bundle). Replaced with the local
-// `clampedNorm` helper. Also dropped unused module-local `u`.
-
 const TWO_PI = Math.PI * 2
 const CANVAS_SIZE = 160
 const CANVAS_CENTER = CANVAS_SIZE / 2
@@ -49,7 +45,6 @@ function easeOutCubic(t) {
 function init() {
   container = qs('.tutorials')
   setupPages()
-  postSetup()
 }
 
 function setupPages() {
@@ -77,9 +72,6 @@ function setupPages() {
     }
   }
 }
-
-// NOTE: empty function in original (L) — preserved as no-op.
-function postSetup() {}
 
 function complete(id) {
   const el = pageElements[id]
@@ -401,7 +393,6 @@ export const tutorialController = {
   allCompleted: false,
   completed: {},
   init,
-  complete,
   show,
   hide,
   completeAll,

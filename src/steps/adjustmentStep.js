@@ -1,7 +1,4 @@
-// NOTE: `lerp` was declared as an AMD dep but never invoked in the original —
-// preserved in the named import list to match the legacy import surface.
-// eslint-disable-next-line no-unused-vars
-import { clamp, lerp } from '../utils/native.js'
+import { clamp } from '../utils/native.js'
 // NOTE: original imported `mout/math/norm`, but that mout helper throws outside
 //       [min,max]. The original always wrapped it in a clamp anyway, so we
 //       inline a clampedNorm helper here per project convention.
@@ -15,7 +12,7 @@ import { hide as hideElement, qs, show as showElement } from '../utils/dom.js'
 
 const PI = Math.PI
 const CANVAS_SIZE = 290
-const CANVAS_CENTER = 145
+const CANVAS_CENTER = CANVAS_SIZE / 2
 
 // Sprite atlas coords. Mutated in initCanvas() if running on a retina display
 // (matches the original's `for (var i in e) e[i] *= 2` retina branch).
@@ -42,8 +39,6 @@ let imageHeight = 0
 let scaleRatio = 1
 let drawnWidth = 0
 let drawnHeight = 0
-// NOTE: this flag is assigned but never read in the original — preserved
-let _isReady = false
 const tweenState = { animation: 0 }
 let tutorialPlayed
 
@@ -105,7 +100,6 @@ function computeLayout() {
 
 function show() {
   renderedX = renderedY = targetX = targetY = 0
-  _isReady = false
   animator.killTweensOf(container, 'opacity')
   animator.set(container, { opacity: 1 })
   computeLayout()
@@ -116,7 +110,6 @@ function show() {
 }
 
 function hide() {
-  _isReady = false
   animator.killTweensOf(container, 'opacity')
   animator.to(container, {
     duration: 0.5,
@@ -149,7 +142,6 @@ function startTutorialIntro() {
         stepController.showBackBtn(onBackBtn)
         stepController.showValidateBtn(onValidateBtn)
         tutorialPlayed = true
-        _isReady = true
         animator.killTweensOf(tweenState, 'animation')
         animator.to(tweenState, { duration: 0.5, animation: 2, ease: 'none' })
       },
@@ -193,12 +185,6 @@ function onValidateBtn() {
 
 function clampedNorm(value, min, max) {
   return clamp((value - min) / (max - min), 0, 1)
-}
-
-// NOTE: defined in the original but never invoked — preserved
-function easeOutCubic(t) { // eslint-disable-line no-unused-vars
-  t = t - 1
-  return t * t * t + 1
 }
 
 function easeInOutCos(t) {
@@ -386,7 +372,6 @@ export const adjustmentStep = {
   init,
   show,
   hide,
-  render,
 }
 
 export default adjustmentStep

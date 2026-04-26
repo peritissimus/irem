@@ -17,10 +17,6 @@ import {
 } from '../utils/dom.js'
 import { requestJson } from '../utils/request.js'
 
-// NOTE: original AMD factory captured `t.transform3DStyle` and
-// `t.ERROR_MESSAGES` at module-load time — both are read inside functions
-// here instead, to honor the lazy `config` rule.
-
 const MAX_FILE_SIZE = 5242880
 const MIN_DIMENSION = 512
 const MAX_DIMENSION = 5000
@@ -39,14 +35,10 @@ let scrollPane
 let itemsContainer
 let itemTemplate
 let albumCloseBtn
-let _albumOpenBtn // NOTE: cached but never wired in original — preserved
 let photoBackBtn
 let photoOpenBtn
 let loadingEl
 
-let iconLocked = false // NOTE: original `O` flag — set to false in show(),
-                       // checked in over/out handlers, never set to true
-                       // anywhere in the chunk. Preserved verbatim.
 let currentView = {}
 let savedAlbumView = {}
 let savedAlbumItems
@@ -74,7 +66,6 @@ function cacheElements() {
   itemTemplate = qs('.add-steps-upload-methods-item')
   itemTemplate.remove()
   albumCloseBtn = qs('.add-steps-upload-methods-album-close-btn')
-  _albumOpenBtn = qs('.add-steps-upload-methods-album-footer-btn-album-open')
   photoBackBtn = qs('.add-steps-upload-methods-album-footer-btn-photo-back')
   photoOpenBtn = qs('.add-steps-upload-methods-album-footer-btn-photo-open')
   loadingEl = qs('.add-steps-upload-methods-loading')
@@ -88,7 +79,6 @@ function bindEvents() {
   })
   localInput.addEventListener('change', onLocalInputChange)
   instagram.onRetrievedSuccess.add(onInstagramSuccess)
-  instagram.onRetrievedFailed.add(onInstagramFailed)
   facebook.onRetrievedSuccess.add(onFacebookSuccess)
   facebook.onRetrievedFailed.add(onFacebookFailed)
   inputController.add(albumCloseBtn, 'click', onAlbumClose)
@@ -126,11 +116,11 @@ function onScrollUpdate(_event, pos) {
 }
 
 function onIconOver(circleBtn) {
-  if (!iconLocked) setSelectionType(circleBtn.el.dataset.id)
+  setSelectionType(circleBtn.el.dataset.id)
 }
 
 function onIconOut() {
-  if (!iconLocked) setSelectionType('default')
+  setSelectionType('default')
 }
 
 function onIconClick(circleBtn) {
@@ -237,10 +227,8 @@ function renderView(view) {
     if (view.social === 'facebook' && view.type === 'photos') {
       savedAlbumView = currentView
       savedAlbumItems = Array.from(itemsContainer.children)
-      itemsContainer.replaceChildren()
-    } else {
-      itemsContainer.replaceChildren()
     }
+    itemsContainer.replaceChildren()
     toggleClass(albumContainer, 'has-selected', false)
   }
 
@@ -299,9 +287,6 @@ function resetAlbumState() {
   toggleClass(albumContainer, 'has-selected', false)
   hideElement(albumContainer)
 }
-
-// NOTE: empty function in original (Z) — instagram failure handler
-function onInstagramFailed() {}
 
 function onFacebookFailed() {
   uiController.unlock('facebook-load')
@@ -424,7 +409,6 @@ function show() {
   stepController.hideValidateBtn()
   showElement(container)
   setSelectionType('default')
-  iconLocked = false
   animator.killTweensOf(loadingEl, 'opacity')
   animator.set(loadingEl, { opacity: 0 })
   animator.killTweensOf(selectionContainer, 'opacity')
@@ -433,9 +417,6 @@ function show() {
   animator.set(albumContainer, { opacity: 0 })
   hideElement(albumContainer)
   itemsContainer.replaceChildren()
-  // NOTE: original used `transform3d: 'translate3d(Xpx,0,0)'` — migrated to
-  // gsap's `x` shorthand. Original fromTo omitted `ease` on toVars, which
-  // falls back to EKTweener's default (`easeOutCirc`) — preserved as `circ.out`.
   animator.killTweensOf(facebookSymbol, 'x,opacity')
   animator.fromTo(
     facebookSymbol,

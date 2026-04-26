@@ -14,12 +14,6 @@ import { congratsStep } from '../steps/congratsStep.js'
 import { animator } from '../animation/animator.js'
 import { hide as hideElement, qs, qsa, show as showElement, toggleClass } from '../utils/dom.js'
 
-// NOTE: original AMD factory listed `signals` as a dep but body never used it.
-// Dropped. Also dropped the cached selector `b = $(".add-steps-indicators,
-// .add-steps-add-options-look, ...")` which was assigned but never read —
-// the selector even contained a typo (".add-steps-add-steps-congrats")
-// and a duplicate (".add-steps-indicators" twice). Dead code, dropped.
-
 const STEPS = [addOptionsStep, uploadMethodsStep, adjustmentStep, messageStep, congratsStep]
 const stepsById = {}
 
@@ -35,7 +29,6 @@ function init() {
   cacheElements()
   registerSteps()
   bindEvents()
-  updateFading()
 }
 
 function cacheElements() {
@@ -74,16 +67,10 @@ function onValidateClicked() {
   validateCallback()
 }
 
-function indexOfStep(step) {
-  for (let i = 0, len = STEPS.length; i < len; i++) {
-    if (step === STEPS[i]) return i
-  }
-  return -1
-}
-
 function goToStep(id) {
   const step = stepsById[id]
-  trackPage({ trackPage: 'memory-post-' + (indexOfStep(step) + 1) })
+  const animationDuration = step.animationDuration === undefined ? 1 : step.animationDuration
+  trackPage({ trackPage: 'memory-post-' + (STEPS.indexOf(step) + 1) })
   if (step !== currentStep) {
     if (currentStep) currentStep.hide()
     indicators.forEach((indicator, i) => {
@@ -91,7 +78,7 @@ function goToStep(id) {
     })
     animator.killTweensOf(stepCircle.uniforms.animationRatio, 'value')
     animator.to(stepCircle.uniforms.animationRatio, {
-      duration: step.animationDuration === undefined ? 1 : step.animationDuration,
+      duration: animationDuration,
       value: step.animationIndex,
       ease: 'sine.out',
     })
@@ -218,14 +205,8 @@ function disableValidateBtn() {
   validateBtn.circleBtn.disable()
 }
 
-// NOTE: empty function in original (V) — no-op preserved.
-function updateFading() {}
-
 export const stepController = {
   data: {},
-  get container() {
-    return container
-  },
   init,
   goToStep,
   show,
@@ -238,5 +219,4 @@ export const stepController = {
   hideValidateBtn,
   enableValidateBtn,
   disableValidateBtn,
-  updateFading,
 }
